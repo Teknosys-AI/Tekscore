@@ -1,0 +1,161 @@
+{% extends 'base.html' %} {% block content %}
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <div class="form-group d-flex align-items-center justify-content-start">
+                        <form action="{{ url_for('jscore.index') }}" method="POST" class="form-group d-flex align-items-center justify-content-start flex-wrap flex-sm-nowrap">
+                            <label for="mobile_number" class="align-items-center my-3 mr-2 d-none d-sm-inline-block" style="font-weight: bold; color: black; font-size: 0.875rem;">Mobile Number</label>
+                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" style="width: 150px; font-size: 0.875rem;" required>
+                            <input type="submit" value="Submit" class="btn btn-dark ml-2 ml-sm-0" style="font-size: 0.875rem; padding: 5px 10px;">
+                        </form>
+                    </div>
+                    
+                    
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- SIM AGE Card -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <i class="fas fa-thin fa-sim-card fa-2x text-gray-300"></i>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">SIM AGE</div>
+                                        </div>
+                                        <div class="col mr-6 px-4">
+                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">6 Months</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- New Third Card -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <i class="fas fa-regular fa-bookmark fa-2x text-gray-300"></i>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">SIM INFO</div>
+                                        </div>
+                                        <div class="col mr-6 px-4">
+                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">Primary Number</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Credit History Card -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <i class="fas fa-history fa-2x text-gray-300"></i>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">HISTORY</div>
+                                        </div>
+                                        <div class="col mr-6 px-4">
+                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">View Jscore History</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chevron-right fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        
+                    </div>
+                    
+                    <!-- End Content Row -->
+                    <div class="row">
+
+                        <!-- Area Chart -->
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <!--<div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+                                    <div class="dropdown no-arrow">
+                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                            aria-labelledby="dropdownMenuLink">
+                                            <div class="dropdown-header">Dropdown Header:</div>
+                                            <a class="dropdown-item" href="#">Action</a>
+                                            <a class="dropdown-item" href="#">Another action</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Something else here</a>
+                                        </div>
+                                    </div>
+                                </div>-->
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="myPieChart"> </canvas>
+                                    </div>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <div id="scoreCircle" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block;">
+                                              
+                                            </div>
+                                        </span>
+                                        <span class="d-block"><b>Updated:</b> July 26, 2024</span>
+                                        <span class="d-block"><b>Next Update:</b> August 26, 2024</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <!-- Image Column -->
+                                        
+                                        <!-- Text Column -->
+                                        <div class="col-md-6 d-flex align-items-center justify-content-center">
+                                            <div class="d-flex flex-column">
+                                                <!-- Icon -->
+                                                <i class="fas fa-icons fa-2x mb-3 fa-tachometer-alt" style="color: rgb(18, 18, 18);"></i> <!-- Use Font Awesome for the icon, or replace it with your desired icon -->
+                                        
+                                                <!-- First Text -->
+                                                <h4 class="mb-1" style="color: rgb(18, 18, 18);">Understand Jazz JScore
+                                                </h4>
+                                                
+                                                <!-- Second Text -->
+                                                <h9 class="mb-1">
+                                                This score is higher than 11% of consumers yada yada 
+                                                </h9>
+
+                                            </div>
+                                        </div>
+                                        
+
+                                        <div class="col-md-6 text-center">
+                                            <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="max-width: 100%;" src="{{ url_for('static', filename='img/bands3.png') }}" alt="...">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pie Chart -->
+                        
+                    </div>
+                </div>
+                <!-- End of Main Content -->
+                  <!-- Footer -->
+{% endblock %}
+
+
+  
