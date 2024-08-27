@@ -1,3 +1,4 @@
+import bleach
 import logging
 import hashlib
 import requests 
@@ -19,7 +20,7 @@ def index():
             return redirect(url_for('user.show_login'))
 
         if request.method == 'POST':
-            mobile_number = request.form.get('mobile_number')
+            mobile_number = bleach.clean(request.form.get('mobile_number'))
 
             if mobile_number.startswith('0'):
                 mobile_number = '92' + mobile_number[1:]
@@ -32,7 +33,7 @@ def index():
                     # Successfully received data
                     logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
                     
-                    return render_template('index1.html', api_data=api_data)
+                    return render_template('index1.html', api_data=api_data,  mobile_number=mobile_number)
                 else:
                     # Handle errors from the API
                     flash(f'Error calling the API: {api_data.get("error", "Unknown error")}')
