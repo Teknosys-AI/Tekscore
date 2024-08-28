@@ -2,19 +2,19 @@
 if (score === null) {
     colors = ['#bfbfbf']; // Gray color for no data
     content = "NA";       // Display "NA" if score is null
-} else if (score >= 0 && score <= 2) {
+} else if (score >= 1 && score <= 2) {
     colors = ['#f8001f'];
     content = "HIGHRISK";  // Red for 0-2
 } else if (score >= 3 && score <= 4) {
     colors = ['#fb7300'];
-    content = "CHALLENGES";   // Orange for 3-4
+    content = "CHALLENGING";   // Orange for 3-4
 } else if (score >= 5 && score <= 6) {
     colors = ['#f3aa11']; 
     content = "RELIABLE";  // Yellow for 5-6
-} else if (score === 7) {
+} else if (score >= 7 && score <= 8) {
     colors = ['#b3bf00']; 
     content = "POSITIVE";  // Blue for 7
-} else if (score === 8) {
+} else if (score >= 9 && score <= 10) {
     colors = ['#66a44a'];
     content = "OUTSTANDING";   // Green for 8
 } else {

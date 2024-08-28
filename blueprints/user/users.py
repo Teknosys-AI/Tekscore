@@ -2,10 +2,11 @@ import time
 import bleach
 import logging
 import hashlib
+from markupsafe import escape
 from models.user_model import User, db
 from models.usersession_model import UserSession
 from ..api_util.api_utils import call_Jscore_api_function
-from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
+from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort, make_response
 
 
 
@@ -25,6 +26,13 @@ def show_login():
 @user_bp.route('/login', methods=['POST'])
 def login():
     try:
+
+        # Prevent browser caching for this route
+        response = make_response()
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+
         # Check if the user is locked out
         if session.get('login_locked'):
             if time.time() < session['login_locked']:
@@ -117,3 +125,10 @@ def logout():
     except Exception as e:
         logger.error(f"Error during logout: {str(e)}")
         return render_template('error.html'), 500
+
+
+
+        
+@user_bp.route('/notfound')
+def notfound():
+    return render_template('404.html'), 404
