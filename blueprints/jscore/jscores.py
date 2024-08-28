@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 @jscore_bp.route('/', methods=['GET', 'POST'])
 def index():
     try:
+        print(f"Session in index: {session}")
         if 'userId' not in session:
+            # print("redirecting to login by Index")
             return redirect(url_for('user.show_login'))
 
         if request.method == 'POST':

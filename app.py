@@ -60,10 +60,10 @@ def check_session_timeout():
 
     session['last_activity'] = now
 
-app.after_request
-def add_security_headers(response):
-    response.headers['X-Frame-Options'] = 'DENY'
-    return response
+# app.after_request
+# def add_security_headers(response):
+#     response.headers['X-Frame-Options'] = 'DENY'
+#     return response
 
     
 app.register_blueprint(user_bp) 

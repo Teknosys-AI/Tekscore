@@ -1,3 +1,4 @@
+import re
 import logging
 import requests
 from flask import request
@@ -41,3 +42,5 @@ def call_Jscore_api_function(user, mobile_number):
         return {'error': 'An error occurred: ' + str(err)}, 500
 
 
+def is_valid_input(input_string):
+    return bool(WHITELIST_PATTERN.match(input_string))
