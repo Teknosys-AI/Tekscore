@@ -18,10 +18,11 @@ logger = logging.getLogger(__name__)
 @jscore_bp.route('/index', methods=['GET', 'POST'])
 def index():
     try:
-        # print(f"Session in index: {session}")
         if 'userId' not in session:
-            # print("redirecting to login by Index")
             return redirect(url_for('user.show_login'))
+
+        # Check if the form is being resubmitted with a stored mobile number
+        
 
         if request.method == 'POST':
             mobile_number = bleach.clean(request.form.get('mobile_number'))
@@ -29,22 +30,24 @@ def index():
             if mobile_number.startswith('0'):
                 mobile_number = '92' + mobile_number[1:]
 
+            if (mobile_number.startswith('0') and len(mobile_number) != 11) or (mobile_number.startswith('92') and len(mobile_number) != 12):
+                flash('Invalid mobile number length. It must be 11 characters long if starting with 0, or 12 characters long if starting with 92.')
+                return redirect(url_for('jscore.index', page_title='JScore'))
+
             users = User.query.filter_by(UserId=session['userId']).first()
             if users and users.RoleId == 1:
                 api_data, status_code = call_Jscore_api_function(users, mobile_number)
 
                 if status_code == 200:
-                    # Successfully received data
                     logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
                     
                     session['mobile_number'] = mobile_number
-                    session['api_score'] = api_data.get('score')  # Assuming 'score' is the key for the score in your API response
-                    session['api_data'] = api_data  # Store the entire API data if needed
-                    
-                    return render_template('index1.html', api_data=api_data,  mobile_number=mobile_number, page_title='JScore')
+                    session['api_score'] = api_data.get('score')
+                    session['api_data'] = api_data
+
+                    return render_template('index1.html', api_data=api_data, mobile_number=mobile_number, page_title='JScore')
                 else:
-                    # Handle errors from the API
-                    flash(f'Error calling the API: {api_data.get("error", "Unknown error")}')
+                    flash('An Error occures while calling the API')
                     return redirect(url_for('jscore.index', page_title='JScore'))
             else:
                 flash('No access.')
@@ -53,8 +56,8 @@ def index():
         return render_template('index1.html', page_title='JScore')
 
     except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-        return render_template('error.html'), 500  # Redirect to your custom error page
+        return render_template('error.html'), 500
+
 
 
 
@@ -64,15 +67,20 @@ def credithistory():
         # print("redirecting to login by Index")
         return redirect(url_for('user.show_login'))
 
+    if not session.get('mobile_number') or not session.get('api_score') or not session.get('api_data'):
+        flash('Please submit the form to view the credit history.')
+        return redirect(url_for('jscore.index'))
+
     current_date = datetime.now().strftime("%Y-%m-%d")  # Format the date as needed
     
     # Retrieve data from the session
     mobile_number = session.get('mobile_number')
     api_score = session.get('api_score')
     api_data = session.get('api_data')
+    # session['auto_resubmit'] = True
 
     return render_template('credithistory.html', 
-                           page_title='Credit History', 
+                           page_title='JScore History', 
                            current_date=current_date, 
                            mobile_number=mobile_number, 
                            api_score=api_score, 

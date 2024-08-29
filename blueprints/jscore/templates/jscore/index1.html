@@ -3,11 +3,25 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                     <!-- Page Heading -->
                     <div class="form-group d-flex align-items-center justify-content-start">
                         <form action="{{ url_for('jscore.index') }}" method="POST" class="form-group d-flex align-items-center justify-content-start flex-wrap flex-sm-nowrap">
                             <label for="mobile_number" class="align-items-center my-3 mr-2 d-none d-sm-inline-block" style="font-weight: bold; color: black; font-size: 0.875rem;">Mobile Number</label>
-                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" style="width: 150px; font-size: 0.875rem;" required>
+                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" value="{{ mobile_number }}" style="width: 150px; font-size: 0.875rem;" required>
                             <input type="submit" value="Submit" class="btn btn-dark ml-2 ml-sm-0" style="font-size: 0.875rem; padding: 5px 10px;">
                         </form>
                     </div>
@@ -144,7 +158,7 @@
                                         
 
                                         <div class="col-md-6 text-center">
-                                            <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="max-width: 100%;" src="{{ url_for('static', filename='img/bands4.png') }}" alt="...">
+                                            <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="max-width: 100%; " src="{{ url_for('static', filename='img/bands4.png') }}" alt="...">
                                         </div>
                                     </div>
                                 </div>

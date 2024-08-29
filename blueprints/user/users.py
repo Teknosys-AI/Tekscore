@@ -71,6 +71,7 @@ def login():
             session['userId'] = user.UserId
             session['username'] = user.Username
             session.permanent = False
+            session['needs_agreement'] = True
             # print(f"session created  {session['userId']}")
 
             # Create a new session entry in the database
@@ -132,3 +133,16 @@ def logout():
 @user_bp.route('/notfound')
 def notfound():
     return render_template('404.html'), 404
+
+
+
+@user_bp.route('/agreement', methods=['GET', 'POST'])
+def agreement():
+    if 'userId' not in session or not session.get('needs_agreement'):
+        return redirect(url_for('user.show_login'))
+
+    if request.method == 'POST':
+        session.pop('needs_agreement', None)
+        return redirect(url_for('jscore.index'))
+
+    return render_template('agreement.html')

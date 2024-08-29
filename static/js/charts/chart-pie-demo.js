@@ -75,6 +75,10 @@ var myPieChart = new Chart(ctx, {
             ctx.font = fontSize + "em Nunito";
             ctx.textBaseline = "middle";
             ctx.fillStyle = colors; // Set the text color
+            if (width < 150) { // You can adjust the threshold value
+                fontSize = (height / 70).toFixed(2);
+                ctx.font = fontSize + "em Nunito";
+            }
     
             var text = score !== null ? score : "NA", // Show "NA" if score is null
                 textX = Math.round((width - ctx.measureText(text).width) / 2),
@@ -82,15 +86,7 @@ var myPieChart = new Chart(ctx, {
     
             ctx.fillText(text, textX, textY);
     
-            // Display mobile number only if the chart is large enough
-            if (width > 150) { // You can adjust the threshold value
-                ctx.font = (fontSize * 0.5) + "em Nunito";  // Smaller font for mobile number
-                var mobileText = score === null ? "NA" : mobileNumber, // Show "NA" if score is null
-                    mobileTextX = Math.round((width - ctx.measureText(mobileText).width) / 2),
-                    mobileTextY = height / 2 + 30;
-    
-                ctx.fillText(mobileText, mobileTextX, mobileTextY);
-            }
+           
     
             ctx.save();
         }

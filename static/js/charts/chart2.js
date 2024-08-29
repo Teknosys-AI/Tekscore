@@ -27,7 +27,16 @@ if (score === null) {
     colors = ['#000000'];
     content = "NA"; // Handle any unexpected values
 }
-
+document.addEventListener('DOMContentLoaded', function() {
+    var scoreCircle2 = document.getElementById('scoreCircle2');
+    
+    if (scoreCircle2) {
+        scoreCircle2.style.backgroundColor = colors;
+        scoreCircle2.textContent = content;
+    } else {
+        console.warn('Element with ID "scoreCircle" not found');
+    }
+});
 
 for (let i = 0; i < score; i++) {
     data[i] = colors; // Fill the segments based on the score
