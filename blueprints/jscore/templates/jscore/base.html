@@ -46,7 +46,7 @@
                 <div id="CreditScore" class="collapse" aria-labelledby="CreditScore" data-parent="#accordionSidebar">
                     <div class="bg-dark py-2 collapse-inner rounded">
                         
-                        <a class="collapse-item text-light" href="#">
+                        <a class="collapse-item text-light" href="{{ url_for('jscore.credithistory') }}">
                             <i class="fas fa-fw fa-history"></i>
                             <span>Jscore History</span>
                         </a>
@@ -118,7 +118,7 @@
                         <i class="fa fa-bars"></i>
                     </button>
                     <div class="d-sm-flex align-items-center justify-content-between" style="display: flex; align-items: center; align-self: center;">
-                        <h1 class="h3 mb-0 text-gray-800"><b>JScore</b></h1>
+                        <h1 class="h3 mb-0 text-gray-800"><b>{{ page_title }}</b></h1>
                     </div>
 
                     <!-- Topbar Navbar -->
@@ -168,11 +168,10 @@
 
 
 
-
                 <footer class="sticky-footer bg-white">
                     <div class="container my-auto">
                         <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; JSCORES  <span id="year"></span></span>
+                            <span>Copyright &copy; JSCORES <span id="year"></span></span>
                         </div>
                     </div>
                 </footer>
@@ -213,6 +212,8 @@
             <!-- Custom scripts for all pages-->
             <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
             <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
+            <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
+
 
             <script>
                 {% if api_data %}
@@ -228,6 +229,7 @@
             
             
             <script src="{{ url_for('static', filename='js/charts/chart-pie-demo.js') }}"></script>
+            <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script>
             
 
     

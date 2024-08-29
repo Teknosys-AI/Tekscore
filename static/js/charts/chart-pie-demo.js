@@ -23,8 +23,16 @@ if (score === null) {
 }
 
 // Apply the circle color
-document.getElementById('scoreCircle').style.backgroundColor = colors;
-document.getElementById('scoreCircle').textContent = content;
+document.addEventListener('DOMContentLoaded', function() {
+    var scoreCircle = document.getElementById('scoreCircle');
+    
+    if (scoreCircle) {
+        scoreCircle.style.backgroundColor = colors;
+        scoreCircle.textContent = content;
+    } else {
+        console.warn('Element with ID "scoreCircle" not found');
+    }
+});
 
 // Define the data for the pie chart using the score
 var ctx = document.getElementById("myPieChart");
@@ -61,27 +69,31 @@ var myPieChart = new Chart(ctx, {
             var width = chart.chart.width,
                 height = chart.chart.height,
                 ctx = chart.chart.ctx;
-
+    
             ctx.restore();
             var fontSize = (height / 114).toFixed(2); // Adjusted font size
             ctx.font = fontSize + "em Nunito";
             ctx.textBaseline = "middle";
             ctx.fillStyle = colors; // Set the text color
-
+    
             var text = score !== null ? score : "NA", // Show "NA" if score is null
                 textX = Math.round((width - ctx.measureText(text).width) / 2),
                 textY = height / 2;
-
+    
             ctx.fillText(text, textX, textY);
-
-            ctx.font = (fontSize * 0.5) + "em Nunito";  // Smaller font for mobile number
-            var mobileText = score === null ? "NA" : mobileNumber, // Show "NA" if score is null
-                mobileTextX = Math.round((width - ctx.measureText(mobileText).width) / 2),
-                mobileTextY = height / 2 + 30;
-
-            ctx.fillText(mobileText, mobileTextX, mobileTextY);
-
+    
+            // Display mobile number only if the chart is large enough
+            if (width > 150) { // You can adjust the threshold value
+                ctx.font = (fontSize * 0.5) + "em Nunito";  // Smaller font for mobile number
+                var mobileText = score === null ? "NA" : mobileNumber, // Show "NA" if score is null
+                    mobileTextX = Math.round((width - ctx.measureText(mobileText).width) / 2),
+                    mobileTextY = height / 2 + 30;
+    
+                ctx.fillText(mobileText, mobileTextX, mobileTextY);
+            }
+    
             ctx.save();
         }
     }]
+    
 });
