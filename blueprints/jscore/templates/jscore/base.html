@@ -214,8 +214,8 @@
             <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
 
-
-            <script>
+            {% block script %}{% endblock %}
+            <!-- <script>
                 {% if api_data %}
                     var apiData = {{ api_data | tojson | safe }};
                     var mobileNumber = {{ mobile_number }}; // Ensure this is a string
@@ -225,11 +225,10 @@
                     var mobileNumber = "NA"; // Provide a default value
                     var score = null;
                 {% endif %}
-            </script>
-            
-            
+            </script> -->
             <script src="{{ url_for('static', filename='js/charts/chart-pie-demo.js') }}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script>
+            
             
 
     

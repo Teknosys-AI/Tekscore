@@ -103,7 +103,7 @@ def login():
                 flash("Login failed. Please try again.")
                 return redirect(url_for('user.show_login'))
     except Exception as e:
-        # print (e)
+        print (e)
         logger.error(f"Error during login: {str(e)}")
         return render_template('error.html'), 500
 

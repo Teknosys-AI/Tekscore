@@ -3,6 +3,7 @@ import re
 class Config:
     SECRET_KEY = 'hardsecretkey'
     API_ENDPOINT = 'https://quanticaapi.jazz.com.pk/jscore/Jazz_Score'
+    HISTORYAPI_ENDPOINT = 'https://quanticaapi.jazz.com.pk/jscore/Jazz_Score_history'
     #SqlAlchemy Database Configuration With Mysql
     SQLALCHEMY_DATABASE_URI = 'mysql://root:''@localhost/jscore'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

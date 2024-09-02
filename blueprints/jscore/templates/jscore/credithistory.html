@@ -5,7 +5,7 @@
 
                     <!-- Page Heading -->
                     <div class="form-group d-flex align-items-center justify-content-start">
-                        {{mobile_number}}
+                        <b>Mobile Number: </b> {{mobile_number}}
                     </div>
                     
                     
@@ -56,8 +56,8 @@
                                     </div>
                                     <!-- Center the entire pie chart container -->
                                     <div class="d-flex  align-items-center flex-grow-1">
-                                        <div class="h2 font-weight-bold text-gray-800 text-uppercase mb-1">6 Months <br> 
-                                            <div class="text-xs text-uppercase mb-0 font-weight-bold text-gray-800">PRIMARY</div>
+                                        <div class="h2 font-weight-bold text-gray-800 text-uppercase mb-1">{{api_data.sim_age}} <br> 
+                                            <div class="text-xs text-uppercase mb-0 font-weight-bold text-gray-800">{{sim_info}}</div>
                                         </div>
                                         
 
@@ -125,10 +125,13 @@
                                             <label for="dateRange" class="mr-2">Select Date Range:</label>
                                             <select id="dateRange" class="custom-select" onchange="updateChart()" style="display: inline-block; width: auto;">
                                                 <option value="all">All Time</option>
-                                                <option value="14">Last 14 Days</option>
-                                                <option value="10">Last 10 Days</option>
-                                                <option value="7">Last 7 Days</option>
-                                                <option value="5">Last 5 Days</option>
+                                                <option value="14">Last Month</option>
+                                                <option value="10">Last 2 Months</option>
+                                                <option value="7">Last 3 Mohtns</option>
+                                                <option value="5">Last 4 Months</option>
+                                                <option value="5">Last 5 Months</option>
+                                                <option value="5">Last 6 Months</option>
+
                                             </select>
                                         </div>
                                     </div>
@@ -151,7 +154,7 @@
                                         </div>
                                         <!-- Text Column -->
                                         <div class="col px-4">
-                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">AVERAGE</div>
+                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">HIGHEST</div>
                                             <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ current_date }}</div>
                                         </div>
                                     </div>
@@ -181,7 +184,7 @@
                                         </div>
                                         <!-- Text Column -->
                                         <div class="col px-4">
-                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">AVERAGE</div>
+                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">LOWEST</div>
                                             <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ current_date }}</div>
                                         </div>
                                     </div>
@@ -213,3 +216,27 @@
 
 
   
+{% block script %}
+<script type="text/javascript">
+
+    {% if chartData %}
+        var chartData = {{ chartData|tojson }};
+        {% else %}
+        var chartData = null;
+    {% endif %}
+    console.log({{api_score}})
+    var score  = {{api_score}};
+
+    var highest_value = {{ highest_value }} ;
+      
+
+
+    var lowest_value = {{lowest_value}};
+    var average_value = {{average_value}};
+
+</script>
+<!-- <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
+<script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script> -->
+
+
+{% endblock %}
