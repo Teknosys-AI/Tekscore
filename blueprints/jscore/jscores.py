@@ -5,8 +5,8 @@ import requests
 from config import Config
 from datetime import datetime
 from models.user_model import User, db
-from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
 from ..api_util.api_utils import call_Jscore_api_function, call_JscoreHistory_api_function
+from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
 
 # Create a Blueprint for the JScore-related routes
 jscore_bp = Blueprint("jscore", __name__, template_folder="templates/jscore")
@@ -73,7 +73,6 @@ def index():
                         sim_info=sim_info, 
                         page_title='JScore'
                         )
-
                 else:
                     # Handle API call failure
                     flash('An Error occurred while calling the API')
@@ -91,6 +90,9 @@ def index():
         # Handle any unexpected exceptions and render the error page
         return render_template('error.html'), 500
 
+
+# -------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------
 
 
 # Define the route for viewing credit history
@@ -112,6 +114,7 @@ def credithistory():
     # Retrieve the stored mobile number, score, and API data from the session
     mobile_number = session.get('mobile_number')
     api_data = session.get('api_data')
+    sim_age = api_data.get('sim_age')
     sim_info = 'PRIMARY' if api_data.get('sacendory') == 1 else 'SECONDARY'
 
     users = User.query.filter_by(UserId=session['userId']).first()
@@ -127,32 +130,53 @@ def credithistory():
                     int(history_api_data.get(f'month_{i}', 0)) for i in range(1, 7)
                     ]
 
+                    current_month = datetime.now().month
+                    months = {}
+                    for i in range(6):
+                        month_key = f"month_{i + 1}"
+                        calculated_month = (current_month - i - 1) % 12 or 12
+                        months[month_key] = calculated_month
+                    # print (months)
+
                     # Calculate the average, lowest, and highest values
                     if month_values:
-                        average_value = sum(month_values) / len(month_values)
+                        average_value = round(sum(month_values) / len(month_values), 1) 
                         lowest_value = min(month_values)
                         highest_value = max(month_values)
+                        lowest_month_index = month_values.index(lowest_value)
+                        highest_month_index = month_values.index(highest_value)
+
+
+                
+                        # Get the corresponding months (dates)
+                        lowest_month = months[f'month_{lowest_month_index + 1}']
+                        highest_month = months[f'month_{highest_month_index + 1}']
+
+                        month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+                        lowest_month_name = month_names[lowest_month - 1] 
+                        highest_month_name = month_names[highest_month - 1] 
+
+
+                        
                     else:
                         average_value = lowest_value = highest_value = 0
                     
-                    # Debugging print statements (you can remove these later)
-                    # print(f"Average Value: {average_value}")
-                    # print(f"Lowest Value: {lowest_value}")
-                    # print(f"Highest Value: {highest_value}")
                     api_score = session.get('api_score')
                 
                     # Render the credit history template with the retrieved data
                     return render_template('credithistory.html', 
                                         page_title='JScore History', 
                                         current_date=current_date, 
-                                        mobile_number=mobile_number, 
-                                        api_data = api_data, 
+                                        mobile_number=mobile_number,  
+                                        sim_age = sim_age,
                                         sim_info=sim_info,
                                         chartData=history_api_data,
                                         average_value = average_value,
                                         lowest_value = lowest_value,
                                         highest_value = highest_value,
-                                        api_score=api_score
+                                        api_score=api_score,
+                                        lowest_month_name = lowest_month_name,
+                                        highest_month_name = highest_month_name
                                         )
                 else:     
                     flash('Error. Please try again')
@@ -162,3 +186,11 @@ def credithistory():
                 # Handle unauthorized access
                 flash('No access.')
                 return redirect(url_for('jscore.index', page_title='JScore'))
+
+
+
+@jscore_bp.route('/products', methods=['GET', 'POST'])
+def products():
+    if 'userId' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('products.html')

@@ -4,8 +4,9 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <div class="form-group d-flex align-items-center justify-content-start">
-                        <b>Mobile Number: </b> {{mobile_number}}
+                    <div class="form-group d-flex align-items-center mb-3">
+                        <label class="font-weight-bold mr-2" style="margin-bottom: 0rem">Mobile Number:</label>
+                        <span class="font-weight-normal">{{ mobile_number }}</span>
                     </div>
                     
                     
@@ -56,7 +57,7 @@
                                     </div>
                                     <!-- Center the entire pie chart container -->
                                     <div class="d-flex  align-items-center flex-grow-1">
-                                        <div class="h2 font-weight-bold text-gray-800 text-uppercase mb-1">{{api_data.sim_age}} <br> 
+                                        <div class="h2 font-weight-bold text-gray-800 text-uppercase mb-1">{{sim_age}} <br> 
                                             <div class="text-xs text-uppercase mb-0 font-weight-bold text-gray-800">{{sim_info}}</div>
                                         </div>
                                         
@@ -79,7 +80,6 @@
                                         <!-- Text Column -->
                                         <div class="col px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">AVERAGE</div>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ current_date }}</div>
                                         </div>
                                     </div>
                         
@@ -155,7 +155,7 @@
                                         <!-- Text Column -->
                                         <div class="col px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">HIGHEST</div>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ current_date }}</div>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ highest_month_name }}</div>
                                         </div>
                                     </div>
                         
@@ -185,7 +185,7 @@
                                         <!-- Text Column -->
                                         <div class="col px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">LOWEST</div>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ current_date }}</div>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ lowest_month_name }}</div>
                                         </div>
                                     </div>
                         
@@ -224,13 +224,10 @@
         {% else %}
         var chartData = null;
     {% endif %}
-    console.log({{api_score}})
     var score  = {{api_score}};
 
-    var highest_value = {{ highest_value }} ;
-      
 
-
+    var highest_value = {{ highest_value }} ;      
     var lowest_value = {{lowest_value}};
     var average_value = {{average_value}};
 

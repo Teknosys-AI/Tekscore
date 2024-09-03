@@ -1,5 +1,8 @@
 var ctx2 = document.getElementById('myPieChart2').getContext('2d');
 var score = 1;
+var average_value = 0;
+var highest_value = 0;      
+var lowest_value = 0;
 var colors = '#fb7300'
 var emptyColor = '#e0e0e0';
 var data = Array(8).fill(emptyColor); // Start with all segments empty
@@ -74,7 +77,34 @@ var myPieChart2 = new Chart(ctx2, {
         },
         responsive: true,
         cutoutPercentage: 80, // Increase this value to make the chart thinner
-    }
+    },
+    plugins: [{
+        afterDraw: function(chart) {
+            var width = chart.chart.width,
+                height = chart.chart.height,
+                ctx = chart.chart.ctx;
+    
+            ctx.restore();
+            var fontSize = (height / 114).toFixed(2); // Adjusted font size
+            ctx.font = fontSize + "em Nunito";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = colors; // Set the text color
+            if (width < 150) { // You can adjust the threshold value
+                fontSize = (height / 70).toFixed(2);
+                ctx.font = fontSize + "em Nunito";
+            }
+    
+            var text = score !== null ? average_value : "NA", // Show "NA" if score is null
+                textX = Math.round((width - ctx.measureText(text).width) / 2),
+                textY = height / 2;
+    
+            ctx.fillText(text, textX, textY);
+    
+           
+    
+            ctx.save();
+        }
+    }]
 });
 
 
@@ -123,7 +153,34 @@ var myPieChart3 = new Chart(ctx3, {
         },
         responsive: true,
         cutoutPercentage: 80, // Increase this value to make the chart thinner
-    }
+    },
+    plugins: [{
+        afterDraw: function(chart) {
+            var width = chart.chart.width,
+                height = chart.chart.height,
+                ctx = chart.chart.ctx;
+    
+            ctx.restore();
+            var fontSize = (height / 114).toFixed(2); // Adjusted font size
+            ctx.font = fontSize + "em Nunito";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = colors; // Set the text color
+            if (width < 150) { // You can adjust the threshold value
+                fontSize = (height / 70).toFixed(2);
+                ctx.font = fontSize + "em Nunito";
+            }
+    
+            var text = score !== null ? highest_value : "NA", // Show "NA" if score is null
+                textX = Math.round((width - ctx.measureText(text).width) / 2),
+                textY = height / 2;
+    
+            ctx.fillText(text, textX, textY);
+    
+           
+    
+            ctx.save();
+        }
+    }]
 });
 
 
@@ -174,5 +231,32 @@ var myPieChart4 = new Chart(ctx4, {
         },
         responsive: true,
         cutoutPercentage: 80, // Increase this value to make the chart thinner
-    }
+    },
+    plugins: [{
+        afterDraw: function(chart) {
+            var width = chart.chart.width,
+                height = chart.chart.height,
+                ctx = chart.chart.ctx;
+    
+            ctx.restore();
+            var fontSize = (height / 114).toFixed(2); // Adjusted font size
+            ctx.font = fontSize + "em Nunito";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = colors; // Set the text color
+            if (width < 150) { // You can adjust the threshold value
+                fontSize = (height / 70).toFixed(2);
+                ctx.font = fontSize + "em Nunito";
+            }
+    
+            var text = score !== null ? lowest_value : "NA", // Show "NA" if score is null
+                textX = Math.round((width - ctx.measureText(text).width) / 2),
+                textY = height / 2;
+    
+            ctx.fillText(text, textX, textY);
+    
+           
+    
+            ctx.save();
+        }
+    }]
 });

@@ -87,7 +87,7 @@ def login():
             # Store the session ID in Flask session
             session['session_id'] = session_id
             # print("redirecting to index")
-            return redirect(url_for('jscore.index'))
+            return redirect(url_for('jscore.products'))
         else:
             session['failed_attempts'] = session.get('failed_attempts', 0) + 1
             session.modified = True
