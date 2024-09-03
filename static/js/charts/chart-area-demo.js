@@ -99,7 +99,22 @@
 
 // // Initialize the chart with default data
 // updateChart();
+var months = months
 
+var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Extract the month numbers from the months object and map them to month names
+var monthLabels = [
+    monthNames[months.month_1 - 1],
+    monthNames[months.month_2 - 1],
+    monthNames[months.month_3 - 1],
+    monthNames[months.month_4 - 1],
+    monthNames[months.month_5 - 1],
+    monthNames[months.month_6 - 1]
+];
+
+
+console.log(months)
 var msisdn = chartData.msisdn;
 var data = [
     chartData.month_1,
@@ -115,7 +130,7 @@ var ctx = document.getElementById("myAreaChart");
 var myLineChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"],
+        labels: monthLabels,
         datasets: [{
             label: msisdn,
             data: data,
@@ -169,38 +184,38 @@ function updateChart() {
     ];
 
     var filteredData = [];
-    var labels = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"];
+    var labels = monthLabels; // Use the actual month names here
     var filteredLabels = [];
 
     // Determine the range based on the selected option
     switch (selectedValue) {
         case "all":
-            filteredData = data;
+            filteredData = data;  // Get all months data
             filteredLabels = labels;
             break;
-        case "14": // Last Month
-            filteredData = data.slice(-1); // Get last month data
+        case "1": // Last Month
+            filteredData = data.slice(-1); // Get last 1 month data
             filteredLabels = labels.slice(-1);
             break;
-        case "10": // Last 2 Months
+        case "2": // Last 2 Months
             filteredData = data.slice(-2); // Get last 2 months data
             filteredLabels = labels.slice(-2);
             break;
-        case "7": // Last 3 Months
+        case "3": // Last 3 Months
             filteredData = data.slice(-3); // Get last 3 months data
             filteredLabels = labels.slice(-3);
             break;
-        case "5": // Last 4, 5, or 6 Months
+        case "4": // Last 4 Months
             filteredData = data.slice(-4); // Get last 4 months data
             filteredLabels = labels.slice(-4);
             break;
-        case "6": // Last 5 Months
+        case "5": // Last 5 Months
             filteredData = data.slice(-5); // Get last 5 months data
             filteredLabels = labels.slice(-5);
             break;
-        default: // Last 6 Months
-            filteredData = data.slice(-6); // Get last 6 months data
-            filteredLabels = labels.slice(-6);
+        default: // Last 6 Months (or if no match)
+            filteredData = data;  // Get all months data
+            filteredLabels = labels;
             break;
     }
 
@@ -209,4 +224,5 @@ function updateChart() {
     myLineChart.data.datasets[0].data = filteredData;
     myLineChart.update();
 }
+
 

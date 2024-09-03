@@ -125,12 +125,12 @@
                                             <label for="dateRange" class="mr-2">Select Date Range:</label>
                                             <select id="dateRange" class="custom-select" onchange="updateChart()" style="display: inline-block; width: auto;">
                                                 <option value="all">All Time</option>
-                                                <option value="14">Last Month</option>
-                                                <option value="10">Last 2 Months</option>
-                                                <option value="7">Last 3 Mohtns</option>
-                                                <option value="5">Last 4 Months</option>
+                                                <option value="1">Last Month</option>
+                                                <option value="2">Last 2 Months</option>
+                                                <option value="3">Last 3 Mohtns</option>
+                                                <option value="4">Last 4 Months</option>
                                                 <option value="5">Last 5 Months</option>
-                                                <option value="5">Last 6 Months</option>
+                                                <option value="all">Last 6 Months</option>
 
                                             </select>
                                         </div>
@@ -230,6 +230,7 @@
     var highest_value = {{ highest_value }} ;      
     var lowest_value = {{lowest_value}};
     var average_value = {{average_value}};
+    var months = {{ months|tojson }}; 
 
 </script>
 <!-- <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>

@@ -140,33 +140,26 @@ def credithistory():
 
                     # Calculate the average, lowest, and highest values
                     if month_values:
-                        average_value = round(sum(month_values) / len(month_values), 1) 
+                        average_value = round(sum(month_values) / len(month_values), 1)
                         lowest_value = min(month_values)
                         highest_value = max(month_values)
+
+                        # Get the corresponding month names
+                        month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
                         lowest_month_index = month_values.index(lowest_value)
                         highest_month_index = month_values.index(highest_value)
 
-
-                
-                        # Get the corresponding months (dates)
-                        lowest_month = months[f'month_{lowest_month_index + 1}']
-                        highest_month = months[f'month_{highest_month_index + 1}']
-
-                        month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-                        lowest_month_name = month_names[lowest_month - 1] 
-                        highest_month_name = month_names[highest_month - 1] 
-
-
-                        
+                        lowest_month_name = month_names[months[f'month_{lowest_month_index + 1}'] - 1]
+                        highest_month_name = month_names[months[f'month_{highest_month_index + 1}'] - 1]
                     else:
                         average_value = lowest_value = highest_value = 0
+                        lowest_month_name = highest_month_name = "N/A"
                     
                     api_score = session.get('api_score')
                 
                     # Render the credit history template with the retrieved data
                     return render_template('credithistory.html', 
                                         page_title='JScore History', 
-                                        current_date=current_date, 
                                         mobile_number=mobile_number,  
                                         sim_age = sim_age,
                                         sim_info=sim_info,
@@ -176,7 +169,8 @@ def credithistory():
                                         highest_value = highest_value,
                                         api_score=api_score,
                                         lowest_month_name = lowest_month_name,
-                                        highest_month_name = highest_month_name
+                                        highest_month_name = highest_month_name,
+                                        months = months
                                         )
                 else:     
                     flash('Error. Please try again')
