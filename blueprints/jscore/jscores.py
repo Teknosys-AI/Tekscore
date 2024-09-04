@@ -62,7 +62,7 @@ def index():
                     session['api_data'] = api_data
 
                     sim_age = api_data.get('sim_age', 'NA')
-                    sim_info = 'PRIMARY' if api_data.get('sacendory') == 1 else 'SECONDARY'
+                    sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
 
                     # Render the template with the obtained data
                     return render_template(
@@ -115,7 +115,7 @@ def credithistory():
     mobile_number = session.get('mobile_number')
     api_data = session.get('api_data')
     sim_age = api_data.get('sim_age')
-    sim_info = 'PRIMARY' if api_data.get('sacendory') == 1 else 'SECONDARY'
+    sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
 
     users = User.query.filter_by(UserId=session['userId']).first()
 

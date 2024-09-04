@@ -31,6 +31,7 @@ if (score === null) {
     content = "NA"; // Handle any unexpected values
 }
 document.addEventListener('DOMContentLoaded', function() {
+
     var scoreCircle2 = document.getElementById('scoreCircle2');
     
     if (scoreCircle2) {
@@ -38,6 +39,18 @@ document.addEventListener('DOMContentLoaded', function() {
         scoreCircle2.textContent = content;
     } else {
         console.warn('Element with ID "scoreCircle" not found');
+    }
+
+    
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var dyncolor = document.getElementById('dyncolor');
+    
+    if (dyncolor) {
+        dyncolor.style.color = colors;
+    } else {
+        console.warn('Element with ID "dyncolor" not found');
     }
 });
 
@@ -131,8 +144,8 @@ var myPieChart3 = new Chart(ctx3, {
 
         datasets: [{
             data: Array(score).fill(1).concat(Array(8 - score).fill(1)), // Creates an array with 'score' filled segments and '8-score' empty segments
-            backgroundColor: Array(score).fill(colors).concat(Array(score).fill('#e0e0e0')), // Filled parts are blue, remaining are gray
-            hoverBackgroundColor: Array(score).fill(colors).concat(Array(8 - score).fill('#bfbfbf')),
+            backgroundColor: Array(score).fill('#f3aa11').concat(Array(score).fill('#e0e0e0')), // Filled parts are blue, remaining are gray
+            hoverBackgroundColor: Array(score).fill('#f3aa11').concat(Array(8 - score).fill('#bfbfbf')),
             hoverBorderColor: "rgba(234, 236, 244, 1)",
         }],
     },
@@ -164,7 +177,7 @@ var myPieChart3 = new Chart(ctx3, {
             var fontSize = (height / 114).toFixed(2); // Adjusted font size
             ctx.font = fontSize + "em Nunito";
             ctx.textBaseline = "middle";
-            ctx.fillStyle = colors; // Set the text color
+            ctx.fillStyle = '#f3aa11'; // Set the text color
             if (width < 150) { // You can adjust the threshold value
                 fontSize = (height / 70).toFixed(2);
                 ctx.font = fontSize + "em Nunito";

@@ -6,7 +6,9 @@
                     <!-- Page Heading -->
                     <div class="form-group d-flex align-items-center mb-3">
                         <label class="font-weight-bold mr-2" style="margin-bottom: 0rem">Mobile Number:</label>
-                        <span class="font-weight-normal">{{ mobile_number }}</span>
+                        <!-- <input type="text" class="form-control-plaintext font-weight-normal" value="{{ mobile_number }}" readonly> -->
+                        <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number"  value="{{ mobile_number }}" style="width: auto; font-size: 0.875rem; color: black;" readonly>
+
                     </div>
                     
                     
@@ -19,7 +21,7 @@
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col-auto">
-                                            <i class="fas fa-thin fa-tachometer-alt fa-2x text-gray-300"></i>
+                                            <i class="fas fa-thin fa-tachometer-alt fa-2x " id="dyncolor"></i>
                                         </div>
                                         <div class="col mr-6 px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">Current Score</div>
@@ -155,7 +157,7 @@
                                         <!-- Text Column -->
                                         <div class="col px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">HIGHEST</div>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ highest_month_name }}</div>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ highest_month_name }} 2024</div>
                                         </div>
                                     </div>
                         
@@ -167,7 +169,8 @@
                                         </div>
                         
                                         <!-- Button-Like Box Column -->
-                                        <div id="scoreCircle3" class="ml-3" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block; background-color: #000;">
+                                        <div id="scoreCircle32" class="ml-3" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block; background-color: #f3aa11;">
+                                            RELIABLE
                                             <!-- Content for the box -->
                                         </div>
                                     </div>
@@ -185,7 +188,7 @@
                                         <!-- Text Column -->
                                         <div class="col px-4">
                                             <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">LOWEST</div>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ lowest_month_name }}</div>
+                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">{{ lowest_month_name }} 2024</div>
                                         </div>
                                     </div>
                         
@@ -217,6 +220,8 @@
 
   
 {% block script %}
+
+
 <script type="text/javascript">
 
     {% if chartData %}
@@ -233,6 +238,7 @@
     var months = {{ months|tojson }}; 
 
 </script>
+
 <!-- <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
 <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script> -->
 

@@ -63,7 +63,7 @@
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('jscore.products') }}">
-                    <i class="fas fa-fw fa-chart-area"></i>
+                    <i class="fas fa-fw fa-shopping-bag"></i>
                     <span>Products</span>
                 </a>
             </li>
@@ -77,21 +77,21 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-folder"></i>
+                    <i class="fas fa-fw fa-user-circle"></i>
                     <span>My Account</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-chart-area"></i>
+                    <i class="fas fa-fw fa-question"></i>
                     <span>Help</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-table"></i>
+                    <i class="fas fa-fw fa-phone"></i>
                     <span>Contact Us</span>
                 </a>
             </li>
@@ -214,6 +214,7 @@
             <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
 
+
             {% block script %}{% endblock %}
             <!-- <script>
                 {% if api_data %}
@@ -228,10 +229,7 @@
             </script> -->
             <script src="{{ url_for('static', filename='js/charts/chart-pie-demo.js') }}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script>
-            
-            
 
-    
     
         </div>
     </body>
