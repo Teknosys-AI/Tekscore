@@ -114,7 +114,7 @@ var monthLabels = [
 ];
 
 
-console.log(months)
+// console.log(months)
 var msisdn = chartData.msisdn;
 var data = [
     chartData.month_1,

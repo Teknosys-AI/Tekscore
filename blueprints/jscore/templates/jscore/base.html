@@ -11,6 +11,7 @@
     <title>Jazz</title>
 
     <!-- Custom fonts for this template-->
+    {% block css %}{% endblock %}
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='Assets/logo.png') }}" type="image/png">
@@ -69,7 +70,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('jscore.billingandpayments') }}">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Billing & Payments</span>
                 </a>
@@ -127,7 +128,11 @@
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img class="img-profile rounded-circle mr-2" src="{{ url_for('static', filename='img/user.png') }}">
+                                <img class="img-profile rounded-circle mr-2" 
+                                    src="{{ url_for('static', filename='img/user.png') }}" 
+                                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/userdefault.png') }}';"
+                                >
+
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{session['username']}}</span>
                                 <span class="ml-auto d-none d-lg-inline"><i class="fas fa-chevron-down"></i></span>
                             </a>
@@ -201,7 +206,7 @@
                     </div>
                 </div>
             </div>
-    
+            
             <!-- Bootstrap core JavaScript-->
             <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
             <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -213,6 +218,8 @@
             <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
             <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart2.js')}}"></script>
+            <script src="{{ url_for('static', filename='js/charts/pieAverage.js')}}"></script>
+
 
 
             {% block script %}{% endblock %}
@@ -229,6 +236,7 @@
             </script> -->
             <script src="{{ url_for('static', filename='js/charts/chart-pie-demo.js') }}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script>
+
 
     
         </div>

@@ -159,8 +159,7 @@ def credithistory():
                 
                     # Render the credit history template with the retrieved data
                     return render_template('credithistory.html', 
-                                        page_title='JScore History', 
-                                        mobile_number=mobile_number,  
+                                        page_title='JScore History',  
                                         sim_age = sim_age,
                                         sim_info=sim_info,
                                         chartData=history_api_data,
@@ -188,3 +187,10 @@ def products():
     if 'userId' not in session:
         return redirect(url_for('user.show_login'))
     return render_template('products.html')
+
+
+@jscore_bp.route('/billingandpayments', methods=['GET', 'POST'])
+def billingandpayments():
+    if 'userId' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('billingandpayments.html')

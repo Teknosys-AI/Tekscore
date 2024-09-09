@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block css %}
+
+<!-- Add this CSS in your style block or external stylesheet -->
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;  /* Adjust the width if needed */
+        height: 20px;  /* Set the height smaller */
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;  /* Smaller height for the round button */
+        width: 16px;  /* Smaller width for the round button */
+        left: 4px;
+        bottom: 2px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2D2D2E;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(20px);  /* Adjust based on switch width */
+    }
+    .slider.round {
+        border-radius: 34px;
+    }
+    .slider.round:before {
+        border-radius: 50%;
+    }
+    .card {
+        border: none;
+    }
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .btn-outline-dark {
+        border-color: #000;
+    }
+</style>
+
+
+{% endblock %}
+{% block content %}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+    <!-- Pricing Plan Heading -->
+    <div class="text-center my-5">
+        <div style="background: linear-gradient(to bottom, #1F2031 90%, #fff 100%); border-radius: 30px;padding: 20px;margin-left: 40px; margin-right: 40px; ">
+            <h1 class="font-weight-bold" style="color: whitesmoke;">Choose Your Plan</h1>
+            <p class="lead" >Unlock premium features to boost productivity and streamline your business. Choose the plan that suits you best!</p>
+        </div>
+    </div>
+
+    <!-- Toggle Switch for Monthly/Yearly -->
+    <div class="text-center mb-4 d-flex justify-content-center align-items-center">
+        <span class="font-weight-bold ml-2">Monthly</span>
+        <label class="switch ml-2 mr-2">
+            <input type="checkbox" id="toggle-pricing">
+            <span class="slider round"></span>
+        </label>
+        <span class="ml-2">Yearly <span class="badge badge-warning">Save up to 20%!</span></span>
+    </div>
+    
+
+    <!-- Content Row for Pricing Plans -->
+    <div class="row justify-content-center">
+
+        <!-- Basic Plan -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 text-center shadow">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title font-weight-bold" style="color: #000;">BASIC</h6>
+                    <h2 class="card-title font-weight-bold" style="color: #000;">$9</h2>
+                    <p class="text-muted">3 Projects</p>
+                    <p>250 objects per project</p>
+                    <p>One Active User</p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-dark">Purchase</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Professional Plan -->
+        <div class="col-lg-3 col-md-6 mb-4" >
+            <div class="card h-100 text-center shadow" style="background-color: transparent;">
+                <div class="card-body d-flex flex-column" >
+                    <h6 class="card-title font-weight-bold" style="color: #000;">PROFESSIONAL</h6>
+                    <h2 class="card-title font-weight-bold" style="color: #000;">$29</h2>
+                    <p class="text-muted">20 Projects</p>
+                    <p>800 objects per project</p>
+                    <p>10 Active Users</p>
+                    <p>Team Collaboration</p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-dark">Purchase</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Enterprise Plan -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 text-center shadow">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title font-weight-bold" style="color: #000;">ENTERPRISE</h6>
+                    <h2 class="card-title font-weight-bold" style="color: #000;">$99</h2>
+                    <p class="text-muted">Unlimited Projects</p>
+                    <p>No object limit</p>
+                    <p>Unlimited Users</p>
+                    <p>Team Collaboration</p>
+                    <p>Priority Support</p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-dark">Purchase</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+    
+
+</div>
+<!-- End of Main Content -->
+
+{% endblock %}

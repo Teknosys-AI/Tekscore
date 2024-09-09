@@ -7,7 +7,7 @@
                     <div class="form-group d-flex align-items-center mb-3">
                         <label class="font-weight-bold mr-2" style="margin-bottom: 0rem">Mobile Number:</label>
                         <!-- <input type="text" class="form-control-plaintext font-weight-normal" value="{{ mobile_number }}" readonly> -->
-                        <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number"  value="{{ mobile_number }}" style="width: auto; font-size: 0.875rem; color: black;" readonly>
+                        <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number"  value="{{ chartData.msisdn     }}" style="width: auto; font-size: 0.875rem; color: black;" readonly>
 
                     </div>
                     
@@ -93,14 +93,14 @@
                                         </div>
                         
                                         <!-- Button-Like Box Column -->
-                                        <div id="scoreCircle2" class="ml-4" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block">
-                                            <!-- Content for the box -->
+                                        <div id="scoreCircle2" class="ml-4" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block;">
+                                            <!-- Content for the box will be filled by JS -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         
                         
                         
@@ -234,7 +234,7 @@
 
     var highest_value = {{ highest_value }} ;      
     var lowest_value = {{lowest_value}};
-    var average_value = {{average_value}};
+    var average_value = {{average_value|int }};
     var months = {{ months|tojson }}; 
 
 </script>
