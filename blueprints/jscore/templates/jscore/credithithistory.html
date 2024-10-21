@@ -1,0 +1,307 @@
+{% extends 'base.html' %} {% block content %}
+
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                   
+                    
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Total Checks -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2 bg-dark text-light" style="background-color: #202123 !important;"> <!-- Add background and text color changes -->
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <!-- Sample Icon for the card -->
+                                            <i class="fas fa-shopping-bag fa-2x text-light" style="background-color: #6c757d; padding: 10px; border-radius: 50%;"></i>
+                                        </div>
+                                        <div class="col ml-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="text-xs text-uppercase mb-1" style="font-size: 1rem;">Total Checks</div>
+                                                    <div class="text-xs text-gray-500">Total number of mobile numbers</div>
+                                                </div>
+                                                <div>
+                                                    <i class="fas fa-chevron-right text-light"></i> <!-- Right arrow icon -->
+                                                </div>
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-light mt-2">50,000</div>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <div class="mr-3">
+                                                    <!-- Sample icon with percentage increase -->
+                                                    <i class="fas fa-chart-line"></i> <span class="text-success">+15.6%</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-xs text-gray-500">+1.4k this week</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    
+                        <!-- Remaining Checks -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <!-- User Icon for the card (change to your preferred icon) -->
+                                            <i class="fas fa-user-circle fa-2x text-BLACK-300" style="background-color: #e9ecef; padding: 10px; border-radius: 50%;"></i>
+                                        </div>
+                                        <div class="col ml-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="font-size: 1rem;">Remaining Checks</div>
+                                                    <div class="text-xs text-gray-500">Basic Package Subscribed</div>
+                                                </div>
+                                                <div>
+                                                    <i class="fas fa-chevron-right text-BLACK-500"></i> <!-- Right arrow icon -->
+                                                </div>
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">12,302</div>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <div class="mr-3">
+                                                    <!-- Sample icon with percentage increase -->
+                                                    <i class="fas fa-chart-line"></i> <span class="text-success">+12.7%</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-xs text-gray-500">+1.2k this week</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    
+                        <!-- New Checks -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <!-- Rotating arrow icon for the card (use any icon that fits your need) -->
+                                            <i class="fas fa-sync-alt fa-2x text-BLACK-300" style="background-color: #e9ecef; padding: 10px; border-radius: 50%;"></i>
+                                        </div>
+                                        <div class="col ml-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="font-size: 1rem;">New Checks</div>
+                                                    <div class="text-xs text-gray-500">New mobile numbers</div>
+                                                </div>
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">963</div>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <div class="mr-3">
+                                                    <!-- Decreasing percentage and number icon -->
+                                                    <i class="fas fa-arrow-down text-danger"></i> <span class="text-danger">-12.7%</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-xs text-gray-500">-213</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+
+
+
+
+
+
+                    <div class="row">
+                    <!-- Overall Trend Chart -->
+                    <div class="col-xl-8 col-lg-6">
+                        <div class="card shadow mb-4 equal-card"> <!-- equal-card is the class for equal sizing -->
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="m-0 text-left mb-2" style="position: relative;">Overall Trend</h5>
+                                    <div>
+                                        <label for="dateRange" class="mr-2">Select Date Range:</label>
+                                        <select id="dateRange" class="custom-select" onchange="updateChart()" style="display: inline-block; width: auto;">
+                                            <option value="all">All Time</option>
+                                            <option value="1">Last Month</option>
+                                            <option value="2">Last 2 Months</option>
+                                            <option value="3">Last 3 Months</option>
+                                            <option value="4">Last 4 Months</option>
+                                            <option value="5">Last 5 Months</option>
+                                            <option value="all">Last 6 Months</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="chart-area2 adjustment"> <!-- adjustment is custom class -->
+                                    <canvas id="myTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Checks Review Donut Chart -->
+                    <div class="col-xl-4 col-lg-6">
+                        <div class="card shadow mb-4 equal-card"> <!-- equal-card is the class for equal sizing -->
+                            <div class="card-body">
+                                <!-- Title on the left -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="m-0 text-left">Checks Review</h5>
+                                </div>
+                                <!-- Chart centered in the box -->
+                                <div class="d-flex justify-content-center">
+                                    <div class="chart-pie" style="margin-bottom: 0%;">
+                                        <canvas id="checksReviewChart"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Available/Not Available -->
+                                <div class="mt-1 text-center"> <!-- Reduced margin-top (mt-2) -->
+                                  
+                                    <div class="d-flex justify-content-left flex-column align-items-left">
+                                        <div class="legend-item">
+                                            <span class="legend-badge " style="background-color: #2E991C;"></span> Available
+                                        </div>
+                                        <div class="legend-item mt-2">
+                                            <span class="legend-badge" style="background-color: #BF2807;"></span> Not Available
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                        
+                        
+                    </div>
+
+                    
+{% endblock %}
+
+
+  
+{% block script %}
+<script>
+var ctx = document.getElementById('myTrendChart').getContext('2d');
+var myTrendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: 'Credit Checks',
+            data: [30, 50, 40, 60, 50, 15, 80],
+            borderColor: '#f3aa11',
+            backgroundColor: 'rgba(78, 115, 223, 0.05)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                gridLines: { display: false }
+            }],
+            yAxes: [{
+                ticks: { beginAtZero: true },
+                gridLines: { color: "rgba(234, 236, 244, 1)" }
+            }]
+        },
+        legend: { display: false }
+    }
+});
+
+
+
+
+
+var ctx2 = document.getElementById('checksReviewChart').getContext('2d');
+
+
+
+var myPieChart2 = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: ['Available', 'Not Available'],
+        datasets: [{
+            data: [50000, 5000],
+            backgroundColor: ['#2E991C', '#BF2807'],
+            hoverBackgroundColor: ['#17a673', '#e74a3b'],
+            hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }],
+    },
+    options: {
+        maintainAspectRatio: false,
+        tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            caretPadding: 10,
+        },
+        legend: {
+            display: false
+        },
+        responsive: true,
+        cutoutPercentage: 90, // Increase this value to make the chart thinner
+        
+    },
+    plugins: [{
+        afterDraw: function(chart) {
+            var width = chart.chart.width,
+                height = chart.chart.height,
+                ctx = chart.chart.ctx;
+
+            ctx.restore();
+            var fontSize = (height / 114).toFixed(2); // Adjusted font size
+            ctx.font = fontSize + "em Nunito";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#2E991C"; // Set the text color
+            if (width < 150) { // You can adjust the threshold value
+                fontSize = (height / 70).toFixed(2);
+                ctx.font = fontSize + "em Nunito";
+            }
+
+            var text = "50,000", // Show content based on average value
+                textX = Math.round((width - ctx.measureText(text).width) / 2),
+                textY = height / 2;
+
+            ctx.fillText(text, textX, textY);
+            ctx.save();
+        }
+    }]
+});
+
+
+
+
+// var ctx2 = document.getElementById('checksReviewChart').getContext('2d');
+// var checksReviewChart = new Chart(ctx2, {
+//     type: 'doughnut',
+//     data: {
+//         labels: ['Available', 'Not Available'],
+//         datasets: [{
+//             data: [50000, 5000],
+//             backgroundColor: ['#1cc88a', '#e74a3b'],
+//             hoverBackgroundColor: ['#17a673', '#e74a3b'],
+//             hoverBorderColor: "rgba(234, 236, 244, 1)",
+//         }],
+//     },
+//     options: {
+//         cutoutPercentage: 70,
+//         legend: { display: false },
+//     }
+// });
+
+</script>
+
+{% endblock %}

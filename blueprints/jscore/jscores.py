@@ -5,6 +5,7 @@ import requests
 from config import Config
 from datetime import datetime
 from models.user_model import User, db
+from models.quota_model import Quota
 from ..api_util.api_utils import call_Jscore_api_function, call_JscoreHistory_api_function
 from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 def index():
     try:
         # Check if the user is logged in by verifying the presence of 'userId' in the session
-        if 'userId' not in session:
+        if 'userId'not in session or 'agreementuserid' not in session:
             return redirect(url_for('user.show_login'))
         if request.method == 'GET':
             sim_age = 'NA'
@@ -47,6 +48,14 @@ def index():
             # Fetch the current user from the database using the UserId from the session
             users = User.query.filter_by(UserId=session['userId']).first()
 
+            quota = Quota.query.filter_by(UserId=users.UserId).first()
+
+            # Check if the user has remaining quota
+            if quota.UsedQuota >= quota.MaxQuota:
+                flash('Quota limit reached. You cannot make more requests.')
+                return redirect(url_for('jscore.index', page_title='JScore'))
+
+
             # Check if the user is authorized (RoleId == 1)
             if users and users.RoleId == 1:
                 # Call the external API to retrieve the score and related data
@@ -56,6 +65,8 @@ def index():
                 if status_code == 200:
                     logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
                     
+                    quota.UsedQuota += 1
+                    db.session.commit()
                     # Store the mobile number, score, and API data in the session
                     session['mobile_number'] = mobile_number
                     session['api_score'] = api_data.get('score')
@@ -88,6 +99,7 @@ def index():
 
     except Exception as e:
         # Handle any unexpected exceptions and render the error page
+        print(e)
         return render_template('error.html'), 500
 
 
@@ -99,7 +111,7 @@ def index():
 @jscore_bp.route('/credithistory', methods=['GET', 'POST'])
 def credithistory():
     # Check if the user is logged in by verifying the presence of 'userId' in the session
-    if 'userId' not in session:
+    if 'userId'not in session or 'agreementuserid' not in session:
         return redirect(url_for('user.show_login'))
 
 
@@ -169,7 +181,8 @@ def credithistory():
                                         api_score=api_score,
                                         lowest_month_name = lowest_month_name,
                                         highest_month_name = highest_month_name,
-                                        months = months
+                                        months = months,
+                                        mobile_number = mobile_number
                                         )
                 else:     
                     flash('Error. Please try again')
@@ -182,15 +195,117 @@ def credithistory():
 
 
 
-@jscore_bp.route('/products', methods=['GET', 'POST'])
+@jscore_bp.route('/products')
 def products():
-    if 'userId' not in session:
+    if 'userId'not in session or 'agreementuserid' not in session:
         return redirect(url_for('user.show_login'))
     return render_template('products.html')
 
 
-@jscore_bp.route('/billingandpayments', methods=['GET', 'POST'])
+@jscore_bp.route('/billingandpayments')
 def billingandpayments():
-    if 'userId' not in session:
+    if 'userId'not in session or 'agreementuserid' not in session:
         return redirect(url_for('user.show_login'))
     return render_template('billingandpayments.html')
+
+
+@jscore_bp.route('/myaccount')
+def myaccount():
+    if 'userId'not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('myaccount.html')
+
+
+
+@jscore_bp.route('/credithithistory')
+def credithithistory():
+    if 'userId'not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('credithithistory.html')
+
+
+
+
+
+
+
+
+
+# # Define the route for viewing credit history
+# @jscore_bp.route('/credithistory', methods=['GET', 'POST'])
+# def credithistory():
+#     # Check if the user is logged in by verifying the presence of 'userId' in the session
+#     if 'userId' not in session:
+#         return redirect(url_for('user.show_login'))
+
+
+#     # Ensure that the necessary data is present in the session
+#     # if not session.get('mobile_number') or not session.get('api_score') or not session.get('api_data'):
+#     #     flash('Please submit the form to view the credit history.')
+#     #     return redirect(url_for('jscore.index'))
+
+#     # Get the current date to be displayed on the page
+#     current_date = datetime.now().strftime("%Y-%m-%d")  # Format the date as needed
+    
+#     # Retrieve the stored mobile number, score, and API data from the session
+#     mobile_number = '923034605404'
+#     api_data = session.get('api_data')
+#     sim_age = '+12 MONTHS'
+#     sim_info = 'SECONDARY NUMBER'
+
+#     users = User.query.filter_by(UserId=session['userId']).first()
+
+#     if users and users.RoleId == 1:
+#                 # Call the external API to retrieve the score and related data
+#                 #history_api_data, status_code = call_JscoreHistory_api_function(users, mobile_number)
+
+#                 # If the API call is successful, store relevant data in the session and render the template
+#                     history_api_data = {'month_1': 5,'month_2': 3,'month_3': 7,'month_4': 2,'month_5': 8,'month_6': 7}
+#                     #logger.info(f"History API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
+#                     month_values = [
+#                     int(history_api_data.get(f'month_{i}', 0)) for i in range(1, 7)
+#                     ]
+
+#                     current_month = datetime.now().month
+#                     months = {}
+#                     for i in range(6):
+#                         month_key = f"month_{i + 1}"
+#                         calculated_month = (current_month - i - 1) % 12 or 12
+#                         months[month_key] = calculated_month
+#                     # print (months)
+
+#                     # Calculate the average, lowest, and highest values
+#                     if month_values:
+#                         average_value = round(sum(month_values) / len(month_values), 1)
+#                         lowest_value = min(month_values)
+#                         highest_value = max(month_values)
+
+#                         # Get the corresponding month names
+#                         month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+#                         lowest_month_index = month_values.index(lowest_value)
+#                         highest_month_index = month_values.index(highest_value)
+
+#                         lowest_month_name = month_names[months[f'month_{lowest_month_index + 1}'] - 1]
+#                         highest_month_name = month_names[months[f'month_{highest_month_index + 1}'] - 1]
+#                     else:
+#                         average_value = lowest_value = highest_value = 0
+#                         lowest_month_name = highest_month_name = "N/A"
+                    
+#                     api_score = 4
+                
+#                     # Render the credit history template with the retrieved data
+#                     return render_template('credithistory.html', 
+#                                         page_title='JScore History',  
+#                                         sim_age = sim_age,
+#                                         sim_info=sim_info,
+#                                         chartData=history_api_data,
+#                                         average_value = average_value,
+#                                         lowest_value = lowest_value,
+#                                         highest_value = highest_value,
+#                                         api_score=api_score,
+#                                         lowest_month_name = lowest_month_name,
+#                                         highest_month_name = highest_month_name,
+#                                         months = months,
+#                                         mobile_number = mobile_number
+#                                         )
+            

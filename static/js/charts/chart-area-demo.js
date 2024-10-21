@@ -1,104 +1,4 @@
-// // Assuming `score` is defined somewhere above and contains the score value
-// var colors;
-// var content;
 
-// if (score === null) {
-//     colors = '#bfbfbf'; // Gray color for no data
-//     content = "NA";       // Display "NA" if score is null
-// } else if (score >= 1 && score <= 2) {
-//     colors = '#f8001f';
-//     content = "HIGHRISK";  // Red for 0-2
-// } else if (score >= 3 && score <= 4) {
-//     colors = '#fb7300';
-//     content = "CHALLENGING";   // Orange for 3-4
-// } else if (score >= 5 && score <= 6) {
-//     colors = '#f3aa11'; 
-//     content = "RELIABLE";  // Yellow for 5-6
-// } else if (score >= 7 && score <= 8) {
-//     colors = '#b3bf00'; 
-//     content = "POSITIVE";  // Blue for 7-8
-// } else if (score >= 9 && score <= 10) {
-//     colors = '#66a44a';
-//     content = "OUTSTANDING";   // Green for 9-10
-// } else {
-//     colors = '#000000';
-//     content = "NA"; // Handle any unexpected values
-// }
-
-// var ctx = document.getElementById("myAreaChart");
-// var myLineChart = new Chart(ctx, {
-//     type: 'line',
-//     data: {
-//         labels: [], // Start with an empty labels array
-//         datasets: [{
-//             label: "Earnings",
-//             lineTension: 0.3,
-//             backgroundColor: "rgba(78, 115, 223, 0.05)",
-//             borderColor: colors,
-//             pointRadius: 3,
-//             pointBackgroundColor: colors,
-//             pointBorderColor: colors,
-//             pointHoverRadius: 3,
-//             pointHoverBackgroundColor: colors,
-//             pointHoverBorderColor: colors,
-//             pointHitRadius: 10,
-//             pointBorderWidth: 2,
-//             data: [], // Start with an empty data array
-//         }],
-//     },
-//     options: {
-//         maintainAspectRatio: false,
-//         scales: {
-//             xAxes: [{
-//               gridLines: {
-//                 display: false,
-//                 drawBorder: false
-//               },
-//             }],
-//             yAxes: [{
-//               gridLines: {
-//                 color: "rgb(234, 236, 244)",
-//                 zeroLineColor: "rgb(234, 236, 244)",
-//                 drawBorder: false,
-//                 borderDash: [2],
-//                 zeroLineBorderDash: [2]
-//               }
-//             }],
-//           },
-//           legend: {
-//             display: false
-//           },
-//     }
-// });
-
-// // Function to update the chart based on the selected date range
-// function updateChart() {
-//     var dateRange = document.getElementById("dateRange").value;
-//     var labels = [];
-//     var data = [];
-
-//     // Generate data based on the selected date range
-//     if (dateRange === "all") {
-//         // Example data for all time (replace with your actual data)
-//         labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-//         data = [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000, 25000, 40000];
-//     } else {
-//         // Generate labels and data for the last X days
-//         var days = parseInt(dateRange);
-//         for (var i = 0; i < days; i++) {
-//             labels.push("Day " + (days - i)); // Labels for last X days
-//             data.push(Math.floor(Math.random() * 50000)); // Random data for demonstration (replace with your actual data)
-//         }
-//     }
-
-//     // Update the chart data
-//     myLineChart.data.labels = labels;
-//     myLineChart.data.datasets[0].data = data;
-//     myLineChart.update();
-// }
-
-// // Initialize the chart with default data
-// updateChart();
 var months = months
 
 var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -111,7 +11,7 @@ var monthLabels = [
     monthNames[months.month_4 - 1],
     monthNames[months.month_5 - 1],
     monthNames[months.month_6 - 1]
-];
+].reverse();
 
 
 // console.log(months)
@@ -123,7 +23,7 @@ var data = [
     chartData.month_4,
     chartData.month_5,
     chartData.month_6
-];
+].reverse();
 
 // Use this data array to populate the area chart
 var ctx = document.getElementById("myAreaChart");
@@ -157,6 +57,11 @@ var myLineChart = new Chart(ctx, {
               },
             }],
             yAxes: [{
+                ticks: {
+                    min: 0,    // Set minimum value for Y-axis
+                    max: 10,   // Set maximum value for Y-axis
+                    stepSize: 1 // Optional: set the step size between ticks
+                  },
               gridLines: {
                 color: "rgb(234, 236, 244)",
                 zeroLineColor: "rgb(234, 236, 244)",
@@ -175,12 +80,12 @@ var myLineChart = new Chart(ctx, {
 function updateChart() {
     var selectedValue = document.getElementById("dateRange").value;
     var data = [
-        chartData.month_1,
+        chartData.month_6,
         chartData.month_2,
         chartData.month_3,
         chartData.month_4,
         chartData.month_5,
-        chartData.month_6
+        chartData.month_1
     ];
 
     var filteredData = [];

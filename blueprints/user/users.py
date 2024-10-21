@@ -3,7 +3,9 @@ import bleach
 import logging
 import hashlib
 from markupsafe import escape
+import datetime
 from models.user_model import User, db
+from models.agreement_model import Agreement
 from models.usersession_model import UserSession
 from ..api_util.api_utils import call_Jscore_api_function
 from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort, make_response
@@ -26,7 +28,6 @@ def show_login():
 @user_bp.route('/login', methods=['POST'])
 def login():
     try:
-
         # Prevent browser caching for this route
         response = make_response()
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
@@ -50,50 +51,21 @@ def login():
             Password=hashlib.sha256(password.encode()).hexdigest()
         ).first()
 
-
         if user:
-            # Check if the user has an existing session
+            # Clear any previous session-related flags
             session.pop('failed_attempts', None)
-            existing_session = UserSession.query.filter_by(SessionUserId=user.UserId).first()
 
-            if existing_session:
-                # Log out the user from the previous session
-                # print(existing_session.SessionUserId)
-                UserSession.query.filter_by(SessionUserId=user.UserId).delete()
-                db.session.commit()
-                # print(existing_session.SessionUserId)
-                session.clear()
+            # Temporarily store user details until agreement
+            session['temp_user_id'] = user.UserId
+            session['temp_username'] = user.Username
 
+            # Redirect to privacy policy page for agreement
+            return redirect(url_for('user.privacy_policy'))
 
-
-            # Clear the current session and log in the user
-            session.clear()
-            session['userId'] = user.UserId
-            session['username'] = user.Username
-            session.permanent = False
-            session['needs_agreement'] = True
-            # print(f"session created  {session['userId']}")
-
-            # Create a new session entry in the database
-            session_id = str(time.time())  # Generate a unique session ID (you can use any other method)
-            user_session = UserSession(
-                SessionUserId=user.UserId,
-                SessionId=session_id
-            )
-            db.session.add(user_session)
-            db.session.commit()
-            # print(f"DB session created {user_session.SessionUserId}")
-
-            # Store the session ID in Flask session
-            session['session_id'] = session_id
-            # print("redirecting to index")
-            return redirect(url_for('jscore.products'))
         else:
+            # Handle failed login logic...
             session['failed_attempts'] = session.get('failed_attempts', 0) + 1
             session.modified = True
-            # print ("failed attempt ")
-            # print (session['failed_attempts'])
-
             if session['failed_attempts'] >= 5:
                 session['login_locked'] = time.time() + 60  # Lock for 1 minute
                 session.pop('failed_attempts', None)  # Reset failed attempts counter
@@ -102,10 +74,11 @@ def login():
             else:
                 flash("Login failed. Please try again.")
                 return redirect(url_for('user.show_login'))
+
     except Exception as e:
-        print (e)
         logger.error(f"Error during login: {str(e)}")
         return render_template('error.html'), 500
+
 
 
 
@@ -136,13 +109,51 @@ def notfound():
 
 
 
-@user_bp.route('/agreement', methods=['GET', 'POST'])
-def agreement():
-    if 'userId' not in session or not session.get('needs_agreement'):
-        return redirect(url_for('user.show_login'))
+@user_bp.route('/privacy_policy', methods=['GET'])
+def privacy_policy():
+    return render_template('privacy_policy.html')
 
-    if request.method == 'POST':
-        session.pop('needs_agreement', None)
-        return redirect(url_for('jscore.index'))
 
-    return render_template('agreement.html')
+@user_bp.route('/agree_privacy', methods=['POST'])
+def agree_privacy():
+    try:
+        # Retrieve the temporary user information
+        temp_user_id = session.get('temp_user_id')
+        temp_username = session.get('temp_username')
+
+        if not temp_user_id or not temp_username:
+            flash("Session expired or invalid. Please log in again.")
+            return redirect(url_for('user.show_login'))
+
+        
+        
+
+        # Create a new session in the database
+        session_id = str(time.time())  # Generate a unique session ID
+
+        session['session_id'] = session_id
+        current_time = datetime.datetime.now()
+        # Store the user's agreement in the Agreement table
+        new_agreement = Agreement(UserId=temp_user_id, agreement_time=current_time)
+        db.session.add(new_agreement)
+        db.session.commit()
+
+        # Now create the full session
+        session.clear()  # Clear the temporary session data
+        session['userId'] = temp_user_id
+        session['username'] = temp_username
+        session['agreementuserid'] = temp_user_id
+        session.permanent = False
+
+        # log the agreement
+        logger.info(f"User with UserId: {temp_user_id} agrees with Privacy Policy at {current_time}")
+
+
+        # Redirect to the products page after agreeing to the privacy policy
+        return redirect(url_for('jscore.products'))
+
+    except Exception as e:
+        logger.error(f"Error during agreement: {str(e)}")
+        return render_template('error.html'), 500
+
+

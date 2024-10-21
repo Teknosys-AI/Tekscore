@@ -1,64 +1,66 @@
-var ctx2 = document.getElementById('myPieChart2').getContext('2d');
-var score = 1; // Example score
-var average_value = 4; // Example average value
-var colors = '#fb7300'; // Default color
-var emptyColor = '#e0e0e0';
-var data = Array(8).fill(emptyColor); // Start with all segments empty
-var average_valuecolors = '#e0e0e0';
+
+
+  var ctx2av = document.getElementById('myPieChart2').getContext('2d');
+var score = 5; // Example score
+var average_value = 5; // Example average value
+
+var colorsav = '#fb7300'; // Default color
+var emptyColorav = '#e0e0e0';
+var dataav = Array(8).fill(emptyColorav); // Start with all segments empty
+var average_valuecolorsav = '#f8001f';
 var average_valuecontent = "NA";
 
-if (average_value === null) {
-    average_valuecolors = '#bfbfbf'; // Gray color for no data
-    average_valuecontent = "NA";  
-} else if (average_value >= 0 && average_value <= 2) { // Corrected logic
-    average_valuecolors = '#f8001f'; // Red for 0-2
-    average_valuecontent = "HIGHRISK";  
-} else if (average_value >= 3 && average_value <= 4) { // Corrected logic
-    average_valuecolors = '#fb7300'; // Orange for 3-4
-    average_valuecontent = "CHALLENGING";  
-} else if (average_value >= 5 && average_value <= 6) { // Corrected logic
-    average_valuecolors = '#f3aa11'; // Yellow for 5-6
-    average_valuecontent = "RELIABLE";  
-} else if (average_value >= 7 && average_value <= 8) { // Corrected logic
-    average_valuecolors = '#b3bf00'; // Blue for 7-8
-    average_valuecontent = "POSITIVE";  
-} else if (average_value >= 9 && average_value <= 10) { // Corrected logic
-    average_valuecolors = '#66a44a'; // Green for 9-10
-    average_valuecontent = "OUTSTANDING";  
-} else {
-    average_valuecolors = '#000000';
-    average_valuecontent = "NA"; // Handle any unexpected values
-}
 
 document.addEventListener('DOMContentLoaded', function() {
     var scoreCircle2 = document.getElementById('scoreCircle2');
     if (scoreCircle2) {
-        scoreCircle2.style.backgroundColor = average_valuecolors;
+
+
+        if (average_value === null) {
+            average_valuecolorsav = '#bfbfbf'; // Gray color for no data
+            average_valuecontent = "NA";  
+        } else if (average_value >= 0 && average_value <= 2) { // Corrected logic
+            average_valuecolorsav = '#f8001f'; // Red for 0-2
+            average_valuecontent = "HIGHRISK";  
+        } else if (average_value >= 3 && average_value <= 4) { // Corrected logic
+            average_valuecolorsav = '#fb7300'; // Orange for 3-4
+            average_valuecontent = "CHALLENGING";  
+        } else if (average_value >= 5 && average_value <= 6) { // Corrected logic
+            average_valuecolorsav = '#f3aa11'; // Yellow for 5-6
+            average_valuecontent = "RELIABLE";  
+        } else if (average_value >= 7 && average_value <= 8) { // Corrected logic
+            average_valuecolorsav = '#b3bf00'; // Blue for 7-8
+            average_valuecontent = "POSITIVE";  
+        } else if (average_value >= 9 && average_value <= 10) { // Corrected logic
+            average_valuecolorsav = '#66a44a'; // Green for 9-10
+            average_valuecontent = "OUTSTANDING";  
+        } else {
+            average_valuecolorsav = '#000000';
+            average_valuecontent = "NA"; // Handle any unexpected values
+        }
+
+        scoreCircle2.style.backgroundColor = average_valuecolorsav;
         scoreCircle2.textContent = average_valuecontent;
-    } else {
-        console.warn('Element with ID "scoreCircle2" not found');
-    }
 
-    var dyncolor = document.getElementById('dyncolor');
-    if (dyncolor) {
-        dyncolor.style.color = colors;
-    } else {
-        console.warn('Element with ID "dyncolor" not found');
-    }
-});
+        if (dyncolor) {
+            dyncolor.style.color = colors;
+        } else {
+            console.warn('Element with ID "dyncolor" not found');
+        }
 
-for (let i = 0; i < score; i++) {
-    data[i] = colors; // Fill the segments based on the score
-}
 
-var myPieChart2 = new Chart(ctx2, {
+
+        
+
+//added inside
+var myPieChart2 = new Chart(ctx2av, {
     type: 'doughnut',
     data: {
         labels: Array(8).fill(''), // Empty labels to avoid clutter
         datasets: [{
-            data: Array(score).fill(1).concat(Array(8 - score).fill(1)), // Fill segments
-            backgroundColor: Array(score).fill(colors).concat(Array(8 - score).fill(emptyColor)), // Filled segments colored, rest empty
-            hoverBackgroundColor: Array(score).fill(colors).concat(Array(8 - score).fill('#bfbfbf')),
+            data: Array(average_value).fill(1).concat(Array(8 - average_value).fill(1)), // Fill segments
+            backgroundColor: Array(average_value).fill(average_valuecontent).concat(Array(8 - average_value).fill(emptyColorav)), // Filled segments colored, rest empty
+            hoverBackgroundColor: Array(average_value).fill(average_valuecontent).concat(Array(8 - average_value).fill('#bfbfbf')),
             hoverBorderColor: "rgba(234, 236, 244, 1)",
         }],
     },
@@ -71,7 +73,7 @@ var myPieChart2 = new Chart(ctx2, {
             borderWidth: 1,
             xPadding: 15,
             yPadding: 15,
-            displayColors: false,
+            displaycolorsav: false,
             caretPadding: 10,
         },
         legend: {
@@ -90,7 +92,7 @@ var myPieChart2 = new Chart(ctx2, {
             var fontSize = (height / 114).toFixed(2); // Adjusted font size
             ctx.font = fontSize + "em Nunito";
             ctx.textBaseline = "middle";
-            ctx.fillStyle = average_valuecolors; // Set the text color
+            ctx.fillStyle = average_valuecolorsav; // Set the text color
             if (width < 150) { // You can adjust the threshold value
                 fontSize = (height / 70).toFixed(2);
                 ctx.font = fontSize + "em Nunito";
@@ -105,3 +107,24 @@ var myPieChart2 = new Chart(ctx2, {
         }
     }]
 });
+
+
+
+
+    } else {
+        console.warn('Element with ID "scoreCircle2" not found');
+    }
+
+    var dyncolor = document.getElementById('dyncolor');
+    if (dyncolor) {
+        dyncolor.style.color = colorsav;
+    } else {
+        console.warn('Element with ID "dyncolor" not found');
+    }
+});
+
+for (let i = 0; i < score; i++) {
+    dataav[i] = colorsav; // Fill the segments based on the score
+}
+
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agreement</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for a more attractive look */
+        body {
+            background-color: #f8f9fa; /* Light background */
+        }
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add a soft shadow */
+        }
+        .card-title {
+            font-size: 1.75rem; /* Slightly bigger title */
+            font-weight: bold;
+            color: #343a40; /* Darker shade for the title */
+        }
+        .card-text {
+            font-size: 1.1rem;
+            color: #495057; /* Slightly dark shade for the text */
+        }
+        .icon {
+            font-size: 3rem;
+            color: #007bff; /* Brand color */
+            margin-bottom: 1rem;
+        }
+        .btn-dark {
+            background-color: #343a40;
+            border-color: #343a40;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: scale(1.05); /* Slight scaling effect on hover */
+        }
+        .container {
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <div class="card-body">
+                        <!-- Icon for a more modern look -->
+                        <div class="text-center">
+                            <i class="bi bi-file-earmark-lock icon" style="color: #343a40;"></i> <!-- Bootstrap icon -->
+                        </div>
+                        <h3 class="card-title text-center">Terms and Conditions</h3>
+                        <p class="card-text mt-4">
+                            By accessing the J-Score application, you acknowledge that the customer data provided is solely for the purpose of assessing creditworthiness and such data has been shared with the customers’ explicit consent. You are solely responsible for obtaining, maintaining and verifying all required consents from customers. PMCL expressly disclaims any responsibility or liability for any misuse, unauthorized use or mishandling of this data by you or any third party. You agree to indemnify and hold PMCL harmless against any claims, damages, liabilities, penalties or legal actions arising from your failure to comply with these obligations or any violation of applicable data protection laws.
+                        </p>
+                        <p class="card-text">
+                            The customer data may only be used for the limited and specified purpose of creditworthiness assessment. Any unauthorized use, disclosure or sharing of customer information is strictly prohibited. Access to the system is restricted to authorized personnel only and all activities within the system are subject to monitoring and audit for compliance. Any misuse or improper handling of customer data may result in immediate suspension of access, legal action and regulatory penalties.
+                        </p>
+                        <p class="card-text">
+                            <b>
+                                 By proceeding, you confirm your acceptance of these terms and conditions. If you do not agree, please exit the system immediately.
+                            </b>
+                        </p>
+
+                        <!-- Form with an improved button -->
+                        <div class="text-center mt-4">
+                            <form method="POST" action="{{ url_for('user.agree_privacy') }}">
+                                <button type="submit" class="btn btn-dark">I Agree</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+</html>
