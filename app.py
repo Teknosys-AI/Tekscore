@@ -1,15 +1,17 @@
 import logging
 from config import Config
 from models.user_model import db
-# from flask_talisman import Talisman
 from datetime import timedelta, datetime
 from blueprints.user.users import user_bp
+from flask_apscheduler import APScheduler
 from blueprints.jscore.jscores import jscore_bp
+from tasks.backgroungtasks import reset_quota
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 
 
 #create the object of Flask
 app  = Flask(__name__)
+scheduler = APScheduler()
 
 
 # Configure logging
@@ -87,6 +89,13 @@ app.register_blueprint(jscore_bp)
 
 db.init_app(app)
 
+scheduler.init_app(app)
+
+# Schedule the reset_quota job to run daily at 23:59:59
+scheduler.add_job(id='reset_quota_job', func=reset_quota, trigger='cron', hour=23, minute=59, second=59)
+
+
 #run flask app
 if __name__ == "__main__":
+    scheduler.start()
     app.run(debug=True)

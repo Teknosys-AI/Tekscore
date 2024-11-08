@@ -11573,17 +11573,18 @@ body.sidebar-toggled footer.sticky-footer {
     bottom: 100%; /* Position above the image */
     left: 20%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(68, 68, 68, 0.9);;
     color: white;
     padding: 15px;
     border-radius: 8px;
      /* Set a max width for the tooltip */
-    width: 550px;
+    width: 510px;
     visibility: hidden; /* Initially hidden */
     opacity: 0; /* Initially invisible */
     transition: visibility 0s, opacity 0.3s ease;
     z-index: 10;
     text-align: left; /* Align text to the left */
+ 
 }
 
 .col-md-6:hover .tooltip {

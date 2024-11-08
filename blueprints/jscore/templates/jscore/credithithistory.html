@@ -29,14 +29,17 @@
                                                     <i class="fas fa-chevron-right text-light"></i> <!-- Right arrow icon -->
                                                 </div>
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-light mt-2">50,000</div>
+                                            <div class="h5 mb-0 font-weight-bold text-light mt-2">{{quota_limit}}</div>
                                             <div class="d-flex align-items-center mt-3">
                                                 <div class="mr-3">
                                                     <!-- Sample icon with percentage increase -->
-                                                    <i class="fas fa-chart-line"></i> <span class="text-success">+15.6%</span>
+                                                    <i class="fas fa-chart-line"></i> 
+                                                    <span class="{{ 'text-success' if percentage_difference >= 0 else 'text-danger' }}">
+                                                        {{ percentage_difference }}%
+                                                    </span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-gray-500">+1.4k this week</span>
+                                                    <span class="text-xs text-gray-500"></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -65,11 +68,15 @@
                                                     <i class="fas fa-chevron-right text-BLACK-500"></i> <!-- Right arrow icon -->
                                                 </div>
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">12,302</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">{{remaining_quota}}</div>
                                             <div class="d-flex align-items-center mt-3">
                                                 <div class="mr-3">
                                                     <!-- Sample icon with percentage increase -->
-                                                    <i class="fas fa-chart-line"></i> <span class="text-success">+12.7%</span>
+                                                    <i class="fas fa-chart-line"></i> 
+
+                                                    <span class="{{ 'text-success' if last_month_remaining_percentage_difference >= 0 else 'text-danger' }}">
+                                                        {{ last_month_remaining_percentage_difference }}%
+                                                    </span>
                                                 </div>
                                                 <div>
                                                     <span class="text-xs text-gray-500">+1.2k this week</span>
@@ -98,14 +105,14 @@
                                                     <div class="text-xs text-gray-500">New mobile numbers</div>
                                                 </div>
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">963</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2">{{unique_mobile_count}}</div>
                                             <div class="d-flex align-items-center mt-3">
                                                 <div class="mr-3">
                                                     <!-- Decreasing percentage and number icon -->
-                                                    <i class="fas fa-arrow-down text-danger"></i> <span class="text-danger">-12.7%</span>
+                                                    <i class="fas fa-arrow-down text-danger"></i> <span class="text-danger">{{last_month_unique_number_percentage}}</span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-gray-500">-213</span>
+                                                    <span class="text-xs text-gray-500">{{difference_unique_numbers}}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -133,12 +140,12 @@
                                         <label for="dateRange" class="mr-2">Select Date Range:</label>
                                         <select id="dateRange" class="custom-select" onchange="updateChart()" style="display: inline-block; width: auto;">
                                             <option value="all">All Time</option>
-                                            <option value="1">Last Month</option>
-                                            <option value="2">Last 2 Months</option>
-                                            <option value="3">Last 3 Months</option>
-                                            <option value="4">Last 4 Months</option>
-                                            <option value="5">Last 5 Months</option>
-                                            <option value="all">Last 6 Months</option>
+                                            <option value="1">Last Day</option>
+                                            <option value="2">Last 2 Days</option>
+                                            <option value="3">Last 3 Days</option>
+                                            <option value="4">Last 4 Days</option>
+                                            <option value="5">Last 5 Days</option>
+                                            <option value="6">Last 6 Days</option>
                                         </select>
                                     </div>
                                 </div>
@@ -190,97 +197,168 @@
   
 {% block script %}
 <script>
-var ctx = document.getElementById('myTrendChart').getContext('2d');
-var myTrendChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{
-            label: 'Credit Checks',
-            data: [30, 50, 40, 60, 50, 15, 80],
-            borderColor: '#f3aa11',
-            backgroundColor: 'rgba(78, 115, 223, 0.05)',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        scales: {
-            xAxes: [{
-                gridLines: { display: false }
-            }],
-            yAxes: [{
-                ticks: { beginAtZero: true },
-                gridLines: { color: "rgba(234, 236, 244, 1)" }
+
+// Assuming daily_hits_dict is passed as a JSON object from the Flask view
+var daily_hits_dict = {{ daily_hits_dict | tojson }}; // Example data: {'Friday': 7, 'Thursday': 0, ...}
+
+console.log(daily_hits_dict)
+
+// Function to update the chart based on selected date range
+function updateChart() {
+    // Get the selected value from the dropdown
+    var selectedRange = document.getElementById('dateRange').value;
+    
+    // Get the current date
+    var currentDate = new Date();
+    var currentDay = currentDate.getDay();  // Get the day of the week (0 = Sunday, 6 = Saturday)
+
+    // Calculate the start day based on the selected range
+    var startDay;
+
+    // Handle each range case separately
+    if (selectedRange === 'all') {
+        startDay = -1;  // "All Time" - no filtering
+    } else if (selectedRange === '1') {
+        startDay = currentDay - 1;  // Last Day
+    } else if (selectedRange === '2') {
+        startDay = currentDay - 2;  // Last 2 Days
+    } else if (selectedRange === '3') {
+        startDay = currentDay - 3;  // Last 3 Days
+    } else if (selectedRange === '4') {
+        startDay = currentDay - 4;  // Last 4 Days
+    } else if (selectedRange === '5') {
+        startDay = currentDay - 5;  // Last 5 Days
+    } else if (selectedRange === '6') {
+        startDay = currentDay - 6;  // Last 6 Days
+    }
+
+    console.log('Start Day Index:', startDay);
+
+    // Filter the daily_hits_dict based on the start day
+    var filteredDailyHits = getFilteredDailyHits(startDay);
+
+    // Get the labels (days of the week) and data (hit counts) from the filtered data
+    var labels = Object.keys(filteredDailyHits);  // Do not reverse here, keep order as per filtering
+    var data = Object.values(filteredDailyHits);  // Do not reverse here, keep order as per filtering
+
+    // // Reverse the arrays to show the most recent day first
+    // labels.reverse();
+    // data.reverse();
+
+    // Update the chart with the filtered data
+    var ctx = document.getElementById('myTrendChart').getContext('2d');
+    var myTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,  // Labels are the days in reverse order
+            datasets: [{
+                label: 'Credit Checks',
+                data: data,  // The daily hit counts in reverse order
+                borderColor: '#f3aa11',
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                borderWidth: 2
             }]
         },
-        legend: { display: false }
-    }
-});
-
-
-
-
-
-var ctx2 = document.getElementById('checksReviewChart').getContext('2d');
-
-
-
-var myPieChart2 = new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-        labels: ['Available', 'Not Available'],
-        datasets: [{
-            data: [50000, 5000],
-            backgroundColor: ['#2E991C', '#BF2807'],
-            hoverBackgroundColor: ['#17a673', '#e74a3b'],
-            hoverBorderColor: "rgba(234, 236, 244, 1)",
-        }],
-    },
-    options: {
-        maintainAspectRatio: false,
-        tooltips: {
-            backgroundColor: "rgb(255,255,255)",
-            bodyFontColor: "#858796",
-            borderColor: '#dddfeb',
-            borderWidth: 1,
-            xPadding: 15,
-            yPadding: 15,
-            displayColors: false,
-            caretPadding: 10,
-        },
-        legend: {
-            display: false
-        },
-        responsive: true,
-        cutoutPercentage: 90, // Increase this value to make the chart thinner
-        
-    },
-    plugins: [{
-        afterDraw: function(chart) {
-            var width = chart.chart.width,
-                height = chart.chart.height,
-                ctx = chart.chart.ctx;
-
-            ctx.restore();
-            var fontSize = (height / 114).toFixed(2); // Adjusted font size
-            ctx.font = fontSize + "em Nunito";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = "#2E991C"; // Set the text color
-            if (width < 150) { // You can adjust the threshold value
-                fontSize = (height / 70).toFixed(2);
-                ctx.font = fontSize + "em Nunito";
-            }
-
-            var text = "50,000", // Show content based on average value
-                textX = Math.round((width - ctx.measureText(text).width) / 2),
-                textY = height / 2;
-
-            ctx.fillText(text, textX, textY);
-            ctx.save();
+        options: {
+            scales: {
+                xAxes: [{
+                    gridLines: { display: false }
+                }],
+                yAxes: [{
+                    ticks: { beginAtZero: true },
+                    gridLines: { color: "rgba(234, 236, 244, 1)" }
+                }]
+            },
+            legend: { display: false }
         }
-    }]
-});
+    });
+}
 
+// Function to filter the daily_hits_dict based on the selected start day
+function getFilteredDailyHits(startDay) {
+    var filteredHits = {};
+    var daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    // Loop through daily_hits_dict and filter based on the startDay
+    var count = 0;
+    for (var i = 0; i < daysOfWeek.length; i++) {
+        var day = daysOfWeek[(startDay + i + 7) % 7]; // Use modulo to cycle through the days
+        if (count < startDay || startDay === -1) { // For 'All Time', include all days
+            filteredHits[day] = daily_hits_dict[day];
+            count++;
+        }
+    }
+
+    return filteredHits;
+}
+
+// Initial chart update
+updateChart();
+
+
+
+
+// Donet chart
+
+var trueHits = {{ true_hits }};  // Flask variable passed into JS
+    var falseHits = {{ false_hits }};  // Flask variable passed into JS
+
+    var ctx2 = document.getElementById('checksReviewChart').getContext('2d');
+
+    var myPieChart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Successful Hits', 'Failed Hits'],
+            datasets: [{
+                data: [trueHits, falseHits],  // Dynamic data
+                backgroundColor: ['#2E991C', '#BF2807'],
+                hoverBackgroundColor: ['#17a673', '#e74a3b'],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+            },
+            legend: {
+                display: false
+            },
+            responsive: true,
+            cutoutPercentage: 90, // Increase this value to make the chart thinner
+        },
+        plugins: [{
+            afterDraw: function(chart) {
+                var width = chart.chart.width,
+                    height = chart.chart.height,
+                    ctx = chart.chart.ctx;
+
+                ctx.restore();
+                var fontSize = (height / 114).toFixed(2); // Adjusted font size
+                ctx.font = fontSize + "em Nunito";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#2E991C"; // Set the text color
+                if (width < 150) { // You can adjust the threshold value
+                    fontSize = (height / 70).toFixed(2);
+                    ctx.font = fontSize + "em Nunito";
+                }
+
+                var text = trueHits.toString(), // Display true_hits value
+                    textX = Math.round((width - ctx.measureText(text).width) / 2),
+                    textY = height / 2;
+
+                ctx.fillText(text, textX, textY);
+                ctx.save();
+            }
+        }]
+    });
 
 
 

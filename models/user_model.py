@@ -8,16 +8,19 @@ class User(db.Model):
     Password = db.Column(db.String(1000))
     Token = db.Column(db.String(100000), unique = True)
     RoleId = db.Column(db.Integer, db.ForeignKey('Role.Id'))
+    subscription_type_id  = db.Column(db.Integer, db.ForeignKey('subscriptiontype.Id'))
+    
 
  
  
-    def __init__(self, username, password, token,name,roleId, quotaid ):
+    def __init__(self, username, password, token,name,roleId, quotaid , subscriptiontype):
         self.Username = username
         self.Password = password
         self.Name = name
         self.Token = token
         self.RoleId = roleId
         self.QuotaId = quotaid
+        self.subscriptiontype = subscriptiontype
 
 
 

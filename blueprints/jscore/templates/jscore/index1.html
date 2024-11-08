@@ -107,9 +107,10 @@
                                               
                                             </div>
                                         </span>
-                                        <span class="d-block"><b>Updated:</b> July 26, 2024</span>
-                                        <span class="d-block"><b>Next Update:</b> August 26, 2024</span>
-                                    </div>
+                                        <span class="d-block"><b>Updated:</b> <span id="lastMonth"></span></span>
+                                        <span class="d-block"><b>Next Update:</b> <span id="nextMonth"></span></span>
+
+                                </div>
                                     
                                 </div>
                             </div>
@@ -141,7 +142,7 @@
                                                 <br><b>Challenges:</b> Potential for financial repayment difficulties.
                                                 <br><b>Generally reliable:</b> Occasional indicators of financial risk.
                                                 <br><b>Positive information:</b> Indicates reliability for financial commitments.
-                                                <br><b>Outstanding insights:</b> Strong predictor of financial reliabilit.
+                                                <br><b>Outstanding insights:</b> Strong predictor of financial reliability.
                                             </span>
                                         </div>
 
@@ -172,6 +173,32 @@
         var mobileNumber = "NA"; // Provide a default value
         var score = null;
     {% endif %}
+
+
+
+    // Get today's date
+    const today = new Date();
+
+    // Calculate last month's date, set to 26th
+    const lastMonth = new Date(today);
+    lastMonth.setMonth(today.getMonth() - 1);
+    lastMonth.setDate(26);
+
+    // Calculate next month's date, set to 26th
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    nextMonth.setDate(26);
+
+    // Format the dates as "SEP 26, 2024"
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const lastMonthFormatted = lastMonth.toLocaleDateString('en-US', options);
+    const nextMonthFormatted = nextMonth.toLocaleDateString('en-US', options);
+
+    // Insert the formatted dates into the HTML
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('lastMonth').textContent = lastMonthFormatted;
+        document.getElementById('nextMonth').textContent = nextMonthFormatted;
+    });
     
 </script>
 

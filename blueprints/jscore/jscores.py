@@ -1,11 +1,18 @@
+import json
 import bleach
 import logging
 import hashlib
 import requests 
 from config import Config
-from datetime import datetime
-from models.user_model import User, db
+from sqlalchemy import func
 from models.quota_model import Quota
+from models.user_model import User, db
+from models.apihit_model import APIHit
+from datetime import datetime, timedelta
+from models.product_model import Product
+from flask_apscheduler import APScheduler
+from models.user_product import UserProducts
+from models.subscriptiontype_model import SubscriptionType
 from ..api_util.api_utils import call_Jscore_api_function, call_JscoreHistory_api_function
 from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
 
@@ -46,52 +53,114 @@ def index():
                 return redirect(url_for('jscore.index', page_title='JScore'))
 
             # Fetch the current user from the database using the UserId from the session
+            # Get the current date and extract the month and year
+            current_date = datetime.now()
+            current_month = current_date.month
+            current_year = current_date.year
+            jscore_product = db.session.query(Product).filter_by(name='jscore').first()
+            if not jscore_product:
+                return "JScore product not found", 404  # Handle case if product is not found
             users = User.query.filter_by(UserId=session['userId']).first()
+            # quota = Quota.query.filter_by(UserId=users.UserId).first()
+            quota = db.session.query(Quota).filter_by(
+                        UserId=users.UserId,
+                        ProductId=jscore_product.id,
+                        Month=current_month,
+                        Year=current_year
+                    ).first()
+            subscription_type = SubscriptionType.query.filter_by(id=users.subscription_type_id).first()
+        
 
-            quota = Quota.query.filter_by(UserId=users.UserId).first()
-
-            # Check if the user has remaining quota
-            if quota.UsedQuota >= quota.MaxQuota:
-                flash('Quota limit reached. You cannot make more requests.')
-                return redirect(url_for('jscore.index', page_title='JScore'))
-
-
-            # Check if the user is authorized (RoleId == 1)
-            if users and users.RoleId == 1:
-                # Call the external API to retrieve the score and related data
-                api_data, status_code = call_Jscore_api_function(users, mobile_number)
-
-                # If the API call is successful, store relevant data in the session and render the template
-                if status_code == 200:
-                    logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
-                    
-                    quota.UsedQuota += 1
-                    db.session.commit()
-                    # Store the mobile number, score, and API data in the session
-                    session['mobile_number'] = mobile_number
-                    session['api_score'] = api_data.get('score')
-                    session['api_data'] = api_data
-
-                    sim_age = api_data.get('sim_age', 'NA')
-                    sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
-
-                    # Render the template with the obtained data
-                    return render_template(
-                        'index1.html', 
-                        api_data=api_data, 
-                        mobile_number=mobile_number, 
-                        sim_age=sim_age, 
-                        sim_info=sim_info, 
-                        page_title='JScore'
-                        )
-                else:
-                    # Handle API call failure
-                    flash('An Error occurred while calling the API')
+            # Check if the user subscription is Prepaid or Postpaid
+            if subscription_type.subscriptiontype.lower() == 'prepaid':
+                # Check if the user has remaining quota
+                if quota.UsedQuota >= quota.MaxQuota:
+                    flash('Quota limit reached. You cannot make more requests.')
                     return redirect(url_for('jscore.index', page_title='JScore'))
-            else:
-                # Handle unauthorized access
-                flash('No access.')
-                return redirect(url_for('jscore.index', page_title='JScore'))
+
+
+                 # Check if the user is authorized (RoleId == 1)
+                if users and users.RoleId == 1:
+                    # Call the external API to retrieve the score and related data
+                    api_data, status_code = call_Jscore_api_function(users, mobile_number)
+
+                    # If the API call is successful, store relevant data in the session and render the template
+                    if status_code == 200:
+                        # Log
+                        logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
+                        
+                        quota.UsedQuota += 1
+                        score = api_data.get('score')
+                        if score is not None and score != 0:
+                            api_hit = APIHit(
+                                user_id=users.UserId,
+                                product_id=jscore_product.id,
+                                mobile_number=mobile_number,
+                                status=True , # Set to True as the score is valid
+                                score = score
+                            )
+                        else:
+                            api_hit = APIHit(
+                                        user_id=users.UserId,
+                                        product_id=jscore_product.id,  # Assuming you have the jscore_product from earlier in your code
+                                        mobile_number=mobile_number,
+                                        status=False , # Set to True as the API call was successful
+                                        score = score
+                                    )
+
+                        # Add the APIHit record to the session and commit all changes
+                        db.session.add(api_hit)
+                        db.session.commit()
+                        # Store the mobile number, score, and API data in the session
+                        session['mobile_number'] = mobile_number
+                        session['api_score'] = api_data.get('score')
+                        session['api_data'] = api_data
+
+                        sim_age = api_data.get('sim_age', 'NA')
+                        sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
+
+                        # Render the template with the obtained data
+                        return render_template(
+                            'index1.html', 
+                            api_data=api_data, 
+                            mobile_number=mobile_number, 
+                            sim_age=sim_age, 
+                            sim_info=sim_info, 
+                            page_title='JScore'
+                            )
+                    else:
+                        # Handle API call failure
+                       
+                        flash('An Error occurred while calling the API')
+                        return redirect(url_for('jscore.index', page_title='JScore'))
+                else:
+                    # Handle unauthorized access
+                    flash('No access.')
+                    return redirect(url_for('jscore.index', page_title='JScore'))
+            elif subscription_type.subscriptiontype.lower() == 'postpaid':
+                 if users and users.RoleId == 1:
+                        api_data, status_code = call_Jscore_api_function(users, mobile_number)
+                        if status_code == 200:
+                            quota.UsedQuota += 1
+                            db.session.commit()
+                            session['mobile_number'] = mobile_number
+                            session['api_score'] = api_data.get('score')
+                            session['api_data'] = api_data
+
+                            sim_age = api_data.get('sim_age', 'NA')
+                            sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
+
+                            return render_template(
+                                'index1.html', 
+                                api_data=api_data, 
+                                mobile_number=mobile_number, 
+                                sim_age=sim_age, 
+                                sim_info=sim_info, 
+                                page_title='JScore'
+                            )
+                        else:
+                            flash('An error occurred while calling the API')
+                            return redirect(url_for('jscore.index', page_title='JScore'))
         
         # Clear the mobile number in the session if no form is submitted
         session['mobile_number'] = ""
@@ -221,7 +290,214 @@ def myaccount():
 def credithithistory():
     if 'userId'not in session or 'agreementuserid' not in session:
         return redirect(url_for('user.show_login'))
-    return render_template('credithithistory.html')
+    
+    # Get the current date and extract the month and year
+    current_date = datetime.now()
+    current_month = current_date.month
+    current_year = current_date.year
+
+    # Determine last month and year for comparison
+    if current_month == 1:  # If it's January
+        last_month = 12     # December of the previous year
+        last_year = current_year - 1
+    else:
+        last_month = current_month - 1
+        last_year = current_year
+
+ 
+
+    # Retrieve the current user's subscription or product data for the jscore product
+    user_id = session['userId']
+
+    jscore_product = db.session.query(Product).filter_by(name='jscore').first()
+    if not jscore_product:
+        return "JScore product not found", 404  # Handle case if product is not found
+    
+    # Check if the user has this product in their `user_products` table
+    user_product = db.session.query(UserProducts).filter_by(
+        user_id=user_id,
+        product_id=jscore_product.id
+    ).first()
+
+    if not user_product:
+        return "User does not have access to JScore product", 403  # Handle no access
+    
+    
+    users = User.query.filter_by(UserId=user_id).first()
+    subscription_type = SubscriptionType.query.filter_by(id=users.subscription_type_id).first()
+        
+    # Check if the user subscription is Prepaid
+    quota_limit = None
+    last_month_quota_limit = None
+    percentage_difference = None
+
+
+            # Check if the user subscription is Prepaid or Postpaid
+    if subscription_type.subscriptiontype.lower() == 'prepaid':
+        # Fetch the quota limit for the `jscore` product for the current month
+        quota = db.session.query(Quota).filter_by(
+            UserId=user_id,
+            ProductId=jscore_product.id,
+            Month=current_month,
+            Year=current_year
+        ).first()
+
+
+        # Get the quota limit if it exists, or set to None if not found
+        quota_limit = quota.MaxQuota if quota else None
+
+        print (f"limit: {quota_limit}")
+
+
+        # Fetch the last month's quota limit for the `jscore` product
+        last_month_quota = db.session.query(Quota).filter_by(
+            UserId=user_id,
+            ProductId=jscore_product.id,
+            Month= last_month,
+            Year=last_year
+        ).first()
+        
+        last_month_quota_limit = last_month_quota.MaxQuota if last_month_quota else None
+        last_month_quota_used = last_month_quota.UsedQuota if last_month_quota else None
+
+
+
+        # Get MaxQuota and UsedQuota if quota exists
+        if quota:
+            quota_limit = quota.MaxQuota
+            used_quota = quota.UsedQuota if quota.UsedQuota is not None else None
+            remaining_quota = quota_limit - used_quota if quota_limit is not None else None
+
+
+        print (f"last month limit: {last_month_quota_limit}")
+        print (f"Remaining: {remaining_quota}")
+
+
+        # Calculate the percentage difference if both current and last month quotas are available
+        if quota_limit is not None and last_month_quota_limit is not None:
+            percentage_difference = round(((quota_limit - last_month_quota_limit) / last_month_quota_limit) * 100, 2)
+               
+
+        if used_quota is not None and last_month_quota_used is not None:
+            last_month_remaining_percentage_difference = round(((used_quota - last_month_quota_used) / last_month_quota_used) * 100, 2)
+               
+            
+
+            print (f"Percentage: {percentage_difference}")
+            print (f"last_month_remaining_percentage_difference: {last_month_remaining_percentage_difference}")
+
+
+        # Query the unique mobile numbers for the current month
+        unique_mobile_numbers = db.session.query(APIHit.mobile_number).filter(
+                                APIHit.user_id == user_id,  # Filter by user_id (ensure user_id is provided)
+                                func.extract('month', APIHit.timestamp) == current_month,
+                                func.extract('year', APIHit.timestamp) == current_year
+                            ).distinct().all()
+
+        # Get the count of unique mobile numbers
+        unique_mobile_count = len(unique_mobile_numbers)
+
+
+
+        # Query the unique mobile numbers for the last month
+        last_unique_mobile_numbers = db.session.query(APIHit.mobile_number).filter(
+                                APIHit.user_id == user_id,  # Filter by user_id (ensure user_id is provided)
+                                func.extract('month', APIHit.timestamp) == last_month,
+                                func.extract('year', APIHit.timestamp) == last_month
+                            ).distinct().all()
+        
+
+        # Get the count of unique mobile numbers
+        unique_mobile_count = len(unique_mobile_numbers)
+        last_unique_mobile_count = len(last_unique_mobile_numbers)
+        difference_unique_numbers = unique_mobile_count - last_unique_mobile_count
+        # Calculate the last month's unique mobile number percentage difference
+        if last_unique_mobile_count > 0:
+            last_month_unique_number_percentage = round(((unique_mobile_count - last_unique_mobile_count) / last_unique_mobile_count) * 100, 2)
+        else:
+            last_month_unique_number_percentage = 0  # Or any default value you prefer when there's no data
+
+
+        # Print the result (or return it as needed)
+        print(f"Number of unique mobile numbers checked by the user in {current_month}/{current_year}: {unique_mobile_count}")
+
+
+        # Calculate API hits for the last 7 days, grouped by day
+        seven_days_ago = current_date - timedelta(days=7)
+        daily_hits = db.session.query(
+                        func.date(APIHit.timestamp).label('day'),
+                        func.count(APIHit.id).label('hit_count')
+                    ).filter(APIHit.timestamp >= seven_days_ago) \
+                    .group_by(func.date(APIHit.timestamp)) \
+                    .order_by(func.date(APIHit.timestamp)).all()
+
+        # Create a dictionary for daily hit counts
+        daily_hits_dict = {hit.day.strftime('%A'): hit.hit_count for hit in daily_hits}
+
+        # If there are any missing days, add them with a count of 0
+        for i in range(7):
+            date_to_check = (current_date - timedelta(days=i)).strftime('%A')
+            if date_to_check not in daily_hits_dict:
+                daily_hits_dict[date_to_check] = 0
+
+        # Print all 7 days with their respective hit counts
+        print(daily_hits_dict)
+
+
+        # Fetch the API hits for the current month where status = true
+        true_hits = db.session.query(
+            func.count(APIHit.id).label('true_hits')
+        ).filter(
+            APIHit.user_id == user_id,
+            func.extract('month', APIHit.timestamp) == current_month,
+            func.extract('year', APIHit.timestamp) == current_year,
+            APIHit.status == True  # Filter for status = true
+        ).scalar()  # Use scalar to directly get the count
+
+        # Fetch the API hits for the current month where status = false
+        false_hits = db.session.query(
+            func.count(APIHit.id).label('false_hits')
+        ).filter(
+            APIHit.user_id == user_id,
+            func.extract('month', APIHit.timestamp) == current_month,
+            func.extract('year', APIHit.timestamp) == current_year,
+            APIHit.status == False  # Filter for status = false
+        ).scalar()  # Use scalar to directly get the count
+
+        # Print or return the hit counts
+        print(f"API hits with status = True: {true_hits}")
+        print(f"API hits with status = False: {false_hits}")
+
+
+        # Return the rendered template with the necessary data
+        return render_template(
+            'credithithistory.html',
+            true_hits = true_hits,
+            false_hits = false_hits,
+            unique_mobile_count=unique_mobile_count,
+            percentage_difference=percentage_difference,
+            daily_hits_dict=daily_hits_dict,
+            quota_limit=quota_limit,
+            last_month_quota_limit=last_month_quota_limit,
+            remaining_quota=remaining_quota,
+            difference_unique_numbers = difference_unique_numbers,
+            last_month_remaining_percentage_difference=last_month_remaining_percentage_difference,
+            last_month_unique_number_percentage = last_month_unique_number_percentage
+        )
+
+
+
+
+    return render_template('credithithistory.html',
+                           unique_mobile_count=0,
+            percentage_difference=0,
+            daily_hits_dict=0,
+            quota_limit=0,
+            last_month_quota_limit=0,
+            remaining_quota=0,
+            last_month_remaining_percentage_difference=0
+                           
+                           )
 
 
 
