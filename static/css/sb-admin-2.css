@@ -11270,3 +11270,27 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+
+
+
+.accordion-button {
+  background-color: #f8f9fa;
+  color: #000;
+  font-weight: bold;
+  border: none;
+}
+.accordion-button:focus {
+  box-shadow: none;
+}
+.accordion-body {
+  font-size: 0.95rem;
+  color: #555;
+}
+.btn-dark {
+  background-color: #333;
+  border: none;
+  padding: 10px 20px;
+}
+.btn-dark:hover {
+  background-color: #000;
+}

@@ -7,7 +7,7 @@ class User(db.Model):
     Username = db.Column(db.String(100), unique = True)
     Password = db.Column(db.String(1000))
     Token = db.Column(db.String(100000), unique = True)
-    RoleId = db.Column(db.Integer, db.ForeignKey('Role.Id'))
+    RoleId = db.Column(db.Integer, db.ForeignKey('Role.RoleId'))
     subscription_type_id  = db.Column(db.Integer, db.ForeignKey('subscriptiontype.Id'))
     
 

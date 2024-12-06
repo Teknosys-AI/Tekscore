@@ -502,7 +502,54 @@ def credithithistory():
 
 
 
+@jscore_bp.route('/changepassword', methods=['GET', 'POST'])
+def changepassword():
+        if 'userId'not in session or 'agreementuserid' not in session:
+            return redirect(url_for('user.show_login'))
+        
+        if request.method == 'POST':
+        # Get form data
+            users = User.query.filter_by(UserId=session['userId']).first()
 
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+
+            # Validate form data
+            if not current_password or not new_password or not confirm_password:
+                flash('All fields are required!', 'danger')
+            elif new_password != confirm_password:
+                flash('New password and confirm password do not match!', 'danger')
+            else:
+                # Example: Check current password (replace this with your logic)
+                # user = get_current_user()  # Replace with your user session logic
+                user = User.query.filter_by(UserId=session['userId']).first()
+                check_pass = 0
+                if user.Password ==  hashlib.sha256(current_password.encode()).hexdigest() :
+                    check_pass = 1
+
+                # if user and verify_password(current_password, user.password):  # Replace with your password verification
+                if user and check_pass == 1:  # Replace with your password verification
+                
+                    # Update the password (replace with your update logic)
+                    user.Password = hashlib.sha256(new_password.encode()).hexdigest()  # Hash the new password 
+                    # save_user(user)  # Save the user to the database
+                    db.session.commit()
+                    flash('Password changed successfully!', 'success')
+                    return redirect(url_for('jscore.changepassword'))
+                else:
+                    flash('Current password is incorrect!', 'danger')
+
+        return render_template('changepassword.html') 
+
+
+@jscore_bp.route('/contactus', methods=['GET', 'POST'])
+def contactus():
+     return render_template('contactus.html') 
+
+@jscore_bp.route('/help')
+def help_page():
+    return render_template('help.html')
 
 
 

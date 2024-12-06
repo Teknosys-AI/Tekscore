@@ -19,13 +19,18 @@
                     {% endwith %}
                     <!-- Page Heading -->
                     <div class="form-group d-flex align-items-center justify-content-start">
-                        <form action="{{ url_for('jscore.index') }}" method="POST" class="form-group d-flex align-items-center justify-content-start flex-wrap flex-sm-nowrap">
+                        <form id="consent-form" action="{{ url_for('jscore.index') }}" method="POST" class="form-group d-flex align-items-center justify-content-start flex-wrap flex-sm-nowrap" onsubmit="handleConsentRequest(event)">
                             <label for="mobile_number" class="align-items-center my-3 mr-2 d-none d-sm-inline-block" style="font-weight: bold; color: black; font-size: 0.875rem;">Mobile Number</label>
-                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" value="{{ mobile_number }}"   style="width: auto; font-size: 0.875rem; color: black; margin-bottom: 0rem !important" required>
+                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" value="{{ mobile_number }}" style="width: auto; font-size: 0.875rem; color: black; margin-bottom: 0rem !important" required>
                             <input type="submit" value="Submit" class="btn btn-dark ml-2 ml-sm-0" style="font-size: 0.875rem; padding: 5px 10px;">
                         </form>
+                        
                     </div>
                     
+                    <div id="timer-popup" class="alert alert-info" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; z-index: 9999;">
+                        <strong>Please wait...</strong>
+                        <p>Timer: <span id="timer">10</span> seconds</p>
+                    </div>
                     
 
                     <!-- Content Row -->
@@ -199,6 +204,35 @@
         document.getElementById('lastMonth').textContent = lastMonthFormatted;
         document.getElementById('nextMonth').textContent = nextMonthFormatted;
     });
+
+    // Confirmation and Timer Workflow
+    function handleConsentRequest(event) {
+        event.preventDefault();
+
+        // First confirmation popup
+        const confirmConsent = confirm("A message will be sent to this user asking for their consent. Do you want to proceed?");
+        if (confirmConsent) {
+            // Display the timer popup
+            const timerPopup = document.getElementById("timer-popup");
+            timerPopup.style.display = "block";
+
+            let timeLeft = 10; // Timer duration in seconds
+            const timerElement = document.getElementById("timer");
+            timerElement.textContent = `${timeLeft}`;
+
+            // Countdown logic
+            const countdown = setInterval(() => {
+                timeLeft -= 1;
+                timerElement.textContent = `${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timerPopup.style.display = "none";
+                    // Submit the form after timer ends
+                    document.getElementById("consent-form").submit();
+                }
+            }, 1000);
+        }
+    }
     
 </script>
 

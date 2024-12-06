@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <!-- Box container -->
+    <div class="container p-5  rounded bg-white" style=" border: 1px solid #ddd;">
+        <div class="row text-center">
+            <!-- Address -->
+            <div class="col-md-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-light rounded-circle p-4">
+                        <i class="fas fa-map-marker-alt fa-2x dark" style="color: #333;"></i>
+                    </div>
+                    <h5 class="mt-3" style="color: #333;">ADDRESS</h5>
+                    <p>
+                        
+                        <a href="https://www.google.com/maps?q=Jazz+Digital+Headquarters+XYZ,+Islamabad,+Pakistan" target="_blank" style="text-decoration: none; color: #333;">
+                            Jazz Digital Headquarters, XYZ, Islamabad, Pakistan
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="col-md-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-light rounded-circle p-4">
+                        <i class="fas fa-phone fa-2x" style="color: #333;"></i>
+                    </div>
+                    <h5 class="mt-3" style="color: #333;">PHONE</h5>
+                    <p>
+                        <a href="tel:+921234567890" style="text-decoration: none; color: #333;">
+                            +92 000 0000000
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-light rounded-circle p-4">
+                        <i class="fas fa-envelope fa-2x" style="color: #333;"></i>
+                    </div>
+                    <h5 class="mt-3" style="color: #333;">EMAIL</h5>
+                    <p>
+                        <a href="mailto:support@jazzdigital.com" style="text-decoration: none; color: #333;">
+                            support@jazzdigital.com
+                        </a>
+                    </p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{% endblock %}

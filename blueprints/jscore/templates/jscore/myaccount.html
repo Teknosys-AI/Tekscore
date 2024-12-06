@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container-fluid">
+<div class="container-fluid" style="margin-bottom: 10%;">
     <div class="row justify-content-center">
         <!-- Sidebar with links -->
         <div class="col-md-3">
@@ -20,37 +20,29 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title" >Profile</h4>
+                    <h4 class="card-title">Profile</h4>
 
                     <!-- Username field -->
-                    <div class="form-group row">
-                        <label for="username" class="col-sm-3 col-form-label">Username</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="username" value="Moqups" readonly>
-                        </div>
+                    <div class="form-group">
+                        <label for="username" class="col-form-label">Username</label>
+                        <input type="text" class="form-control" id="username" value="Moqups" readonly>
                     </div>
 
                     <!-- Email field -->
-                    <div class="form-group row">
-                        <label for="email" class="col-sm-3 col-form-label">Email Address</label>
-                        <div class="col-sm-9">
-                            <input type="email" class="form-control" id="email" value="contact@moqups.com" readonly>
-                        </div>
+                    <div class="form-group">
+                        <label for="email" class="col-form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" value="contact@moqups.com" readonly>
                     </div>
 
                     <!-- Role field -->
-                    <div class="form-group row">
-                        <label for="role" class="col-sm-3 col-form-label">Role</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="role" value="Product Manager" readonly>
-                        </div>
+                    <div class="form-group">
+                        <label for="role" class="col-form-label">Role</label>
+                        <input type="text" class="form-control" id="role" value="Product Manager" readonly>
                     </div>
 
                     <!-- Change password button -->
-                    <div class="form-group row">
-                        <div class="col-sm-12">
-                            <button class="btn btn-dark btn-block">UPDATE</button>
-                        </div>
+                    <div class="form-group">
+                        <button class="btn btn-dark btn-block">UPDATE</button>
                     </div>
 
                 </div>
