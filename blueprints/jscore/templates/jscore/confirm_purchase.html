@@ -1,0 +1,17 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container text-center">
+  <h2>Confirm Plan Change</h2>
+  <p>
+    You have selected the <strong>{{ plan_id.name|capitalize }}</strong> plan.
+  </p>
+  <p>Are you sure you want to proceed?</p>
+
+  <form action="{{ url_for('jscore.confirm_change_plan') }}" method="POST">
+    <input type="hidden" name="plan_id" value="{{ plan_id.id }}" />
+    <button type="submit" class="btn btn-success">Confirm</button>
+    <a href="{{ url_for('jscore.billingandpayments') }}" class="btn btn-danger"
+      >Cancel</a
+    >
+  </form>
+</div>
+{% endblock %}

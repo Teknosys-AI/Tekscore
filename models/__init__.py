@@ -12,3 +12,5 @@ from .subscriptiontype_model import SubscriptionType
 from .user_product import UserProducts
 from .product_model import Product
 from .apihit_model import APIHit
+from .changeplan_model import ChangePlan
+from .plan_model import Plan

@@ -3,6 +3,9 @@ import logging
 import requests
 from flask import request
 from config import Config
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +30,8 @@ def call_Jscore_api_function(user, mobile_number):
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=False)
         response.raise_for_status()  # Raise an exception for HTTP errors
-
 
         # Process the response (example: returning JSON response from the API)
         api_data = response.json()

@@ -1,17 +1,21 @@
 import json
+import time
 import bleach
+import random
 import logging
 import hashlib
 import requests 
 from config import Config
 from sqlalchemy import func
+from models.plan_model import Plan
 from models.quota_model import Quota
-from models.user_model import User, db
 from models.apihit_model import APIHit
+from models.user_model import User, db
 from datetime import datetime, timedelta
 from models.product_model import Product
-from flask_apscheduler import APScheduler
 from models.user_product import UserProducts
+from models.changeplan_model import ChangePlan
+from blueprints.tasks.tasks import role_required
 from models.subscriptiontype_model import SubscriptionType
 from ..api_util.api_utils import call_Jscore_api_function, call_JscoreHistory_api_function
 from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
@@ -20,9 +24,42 @@ from flask import Blueprint, Flask, jsonify, render_template, request, redirect,
 jscore_bp = Blueprint("jscore", __name__, template_folder="templates/jscore")
 logger = logging.getLogger(__name__)
 
+
+# Will be removed
+def request_and_check_consent(msisdn, client_name="HBL"):
+    print(f"[Mock] Sending consent request to: {msisdn}")
+    time.sleep(10)  # simulate waiting
+    consent_status = random.choice([1, 2, 3])
+    print(f"[Mock] Consent response: {consent_status}")
+    return consent_status
+
+
+
+@jscore_bp.route('/test_consent', methods=['GET', 'POST'])
+def test_consent():
+    consent_result = None
+    mobile_number = None
+
+    if request.method == 'POST':
+        mobile_number = bleach.clean(request.form.get('mobile_number'))
+
+        if mobile_number.startswith('0'):
+            mobile_number = '92' + mobile_number[1:]
+
+        consent_result = request_and_check_consent(mobile_number)
+
+    return render_template(
+        'test_consent.html',
+        consent_result=consent_result,
+        mobile_number=mobile_number,
+        page_title='Test Consent Flow'
+    )
+
+
 # Define the main route for JScore, supporting both GET and POST methods
 @jscore_bp.route('/', methods=['GET', 'POST'])
 @jscore_bp.route('/index', methods=['GET', 'POST'])
+@role_required("Jscore")  # 🔥 Role check applied here!
 def index():
     try:
         # Check if the user is logged in by verifying the presence of 'userId' in the session
@@ -54,6 +91,8 @@ def index():
 
             # Fetch the current user from the database using the UserId from the session
             # Get the current date and extract the month and year
+          
+           
             current_date = datetime.now()
             current_month = current_date.month
             current_year = current_date.year
@@ -68,8 +107,7 @@ def index():
                         Month=current_month,
                         Year=current_year
                     ).first()
-            subscription_type = SubscriptionType.query.filter_by(id=users.subscription_type_id).first()
-        
+            subscription_type = SubscriptionType.query.filter_by(Id=users.subscription_type_id).first()
 
             # Check if the user subscription is Prepaid or Postpaid
             if subscription_type.subscriptiontype.lower() == 'prepaid':
@@ -78,19 +116,21 @@ def index():
                     flash('Quota limit reached. You cannot make more requests.')
                     return redirect(url_for('jscore.index', page_title='JScore'))
 
-
+                
                  # Check if the user is authorized (RoleId == 1)
-                if users and users.RoleId == 1:
+                if users and users.RoleId == 1: 
+                    
                     # Call the external API to retrieve the score and related data
                     api_data, status_code = call_Jscore_api_function(users, mobile_number)
 
+                    print(f" ",status_code, api_data)
                     # If the API call is successful, store relevant data in the session and render the template
                     if status_code == 200:
                         # Log
                         logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
                         
                         quota.UsedQuota += 1
-                        score = api_data.get('score')
+                        score = api_data.get('JSCORE')
                         if score is not None and score != 0:
                             api_hit = APIHit(
                                 user_id=users.UserId,
@@ -113,7 +153,8 @@ def index():
                         db.session.commit()
                         # Store the mobile number, score, and API data in the session
                         session['mobile_number'] = mobile_number
-                        session['api_score'] = api_data.get('score')
+                        session['api_score'] = api_data.get('JSCORE')
+
                         session['api_data'] = api_data
 
                         sim_age = api_data.get('sim_age', 'NA')
@@ -273,9 +314,93 @@ def products():
 
 @jscore_bp.route('/billingandpayments')
 def billingandpayments():
-    if 'userId'not in session or 'agreementuserid' not in session:
-        return redirect(url_for('user.show_login'))
-    return render_template('billingandpayments.html')
+    # Retrieve all plans from the database
+    plans = Plan.query.all()
+
+    # Fetch specific plans by name
+    basic_plan = Plan.query.filter_by(name="Basic").first()
+    professional_plan = Plan.query.filter_by(name="Professional").first()
+    enterprise_plan = Plan.query.filter_by(name="Enterprise").first()
+    print("Basic Plan id:", basic_plan.id)
+    
+
+    return render_template(
+        'billingandpayments.html',
+        # plans=plans,
+        basic_plan_id=basic_plan.id if basic_plan else None,
+        professional_plan_id=professional_plan.id if professional_plan else None,
+        enterprise_plan_id=enterprise_plan.id if enterprise_plan else None
+    )
+
+
+@jscore_bp.route('/purchase_plan/<int:plan_id>')
+def purchase_plan(plan_id):
+    if 'userId' not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))  # Redirect to login if not logged in
+    
+    # Retrieve the selected plan details
+    plan = Plan.query.get(plan_id)
+    if not plan:
+        flash("Invalid plan selected!", "danger")
+        return redirect(url_for('billingandpayments'))
+
+    return render_template('confirm_purchase.html', plan_id=plan)  # Open confirmation page
+
+@jscore_bp.route('/confirm_change_plan', methods=['POST'])
+def confirm_change_plan():
+    if 'userId' not in session:
+        return redirect(url_for('user.show_login'))  # Redirect if not logged in
+
+    user_id = session['userId']
+    user = User.query.get(user_id)
+
+    if not user:
+        flash("User not found!", "danger")
+        return redirect(url_for('jscore.billingandpayments'))
+
+    plan_id = request.form.get('plan_id')  # Fetch plan ID from the form
+    print("plan_id foung from form: ", plan_id)
+    
+
+    if not plan_id:
+        flash("Invalid request. Please select a plan.", "warning")
+        print("plan_id not found")
+        return redirect(url_for('jscore.billingandpayments'))
+
+    try:
+        plan_id = int(plan_id)  # Convert to integer safely
+        plan = Plan.query.get(plan_id)
+        print("plan from db", plan)
+        
+    except ValueError:
+        flash("Invalid plan ID format.", "danger")
+        return redirect(url_for('jscore.billingandpayments'))
+
+    if not plan:
+        flash("Selected plan does not exist.", "danger")
+        return redirect(url_for('jscore.billingandpayments'))
+
+    current_month = datetime.now().month
+
+    change_request = ChangePlan(
+        userid=user.UserId,
+        user_email=user.email,
+        planid=plan_id,
+        month=current_month,
+        date=datetime.now().date(),
+        time=datetime.now().time().replace(microsecond=0),
+        status="pending"
+    )
+
+    print (change_request)
+    db.session.add(change_request)
+    db.session.commit()
+
+    flash(f"Your request to change the plan to {plan.name} has been submitted for approval.", "success")
+    return redirect(url_for('jscore.billingandpayments'))
+
+
+
 
 
 @jscore_bp.route('/myaccount')

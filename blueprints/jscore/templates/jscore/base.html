@@ -41,12 +41,19 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active ">
-                <a class="nav-link " href="{{ url_for('jscore.index') }}" data-toggle="collapse" data-target="#CreditScore" aria-expanded="true" aria-controls="collapseTwo">
+            <li class="nav-item active">
+                 <!-- <li class="nav-item active "> -->
+                <!-- <a class="nav-link " href="{{ url_for('jscore.index') }}" data-toggle="collapse" data-target="#CreditScore" aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Jscore</span>
+                    <span>JScore</span>
+                </a> -->
+
+
+                 <a class="nav-link " href="{{ url_for('jscore.index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>JScore</span>
                 </a>
-                <div id="CreditScore" class="collapse " aria-labelledby="CreditScore" data-parent="#accordionSidebar">
+                <!-- <div id="CreditScore" class="collapse " aria-labelledby="CreditScore" data-parent="#accordionSidebar">
                     <div class="bg-dark py-2 collapse-inner rounded ">
                         
                         <a class="collapse-item text-light BLACKMENU" href="{{ url_for('jscore.credithistory') }}">
@@ -58,25 +65,25 @@
                             <span>Package History</span>
                         </a>
                     </div>
-                </div>
+                </div> -->
             </li>
 
             <!-- Divider -->
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('jscore.products') }}">
                     <i class="fas fa-fw fa-shopping-bag"></i>
                     <span>Products</span>
                 </a>
-            </li>
+            </li> -->
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('jscore.billingandpayments') }}">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Billing & Payments</span>
                 </a>
-            </li>
+            </li> -->
 
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('jscore.myaccount') }}">
@@ -92,12 +99,12 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('jscore.contactus') }}">
                     <i class="fas fa-fw fa-phone" style="transform: rotate(90deg);"></i>
                     <span>Contact Us</span>
                 </a>
-            </li>
+            </li> -->
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

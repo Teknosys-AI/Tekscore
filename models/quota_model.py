@@ -9,7 +9,7 @@ class Quota(db.Model):
     UsedQuota = db.Column(db.Integer)
     UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'))
     ProductId = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    SubscriptionTypeId = db.Column(db.Integer, db.ForeignKey('subscriptiontype.id'), nullable=True)
+    SubscriptionTypeId = db.Column(db.Integer, db.ForeignKey('subscriptiontype.Id'), nullable=True)
     Month = db.Column(db.Integer, nullable=False)
     Year = db.Column(db.Integer, nullable=False)
 

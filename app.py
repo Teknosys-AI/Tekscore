@@ -3,10 +3,15 @@ from config import Config
 from models.user_model import db
 from datetime import timedelta, datetime
 from blueprints.user.users import user_bp
+from blueprints.businessusers.businessusers import businessusers_bp
 from flask_apscheduler import APScheduler
 from blueprints.jscore.jscores import jscore_bp
 from tasks.backgroungtasks import reset_quota
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+
+import pymysql
+pymysql.install_as_MySQLdb()
+
 
 
 #create the object of Flask
@@ -85,6 +90,8 @@ def page_not_found(e):
     
 app.register_blueprint(user_bp) 
 app.register_blueprint(jscore_bp) 
+app.register_blueprint(businessusers_bp) 
+
 
 
 db.init_app(app)
@@ -98,4 +105,4 @@ scheduler.add_job(id='reset_quota_job', func=reset_quota, trigger='cron', hour=2
 #run flask app
 if __name__ == "__main__":
     scheduler.start()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

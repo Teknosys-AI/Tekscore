@@ -36,7 +36,7 @@
                     <!-- Content Row -->
                     <div class="row">
                         <!-- SIM AGE Card -->
-                        <div class="col-xl-4 col-md-6 mb-4">
+                        <!-- <div class="col-xl-4 col-md-6 mb-4">
                             <div class="card shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -50,10 +50,10 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     
                         <!-- New Third Card -->
-                        <div class="col-xl-4 col-md-6 mb-4">
+                        <!-- <div class="col-xl-4 col-md-6 mb-4">
                             <div class="card shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -67,10 +67,10 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Credit History Card -->
-                        <div class="col-xl-4 col-md-6 mb-4">
+                        <!-- <div class="col-xl-4 col-md-6 mb-4">
                             <a href="{{ url_for('jscore.credithistory') }}" style="text-decoration: none;">
                             <div class="card shadow h-100 py-2">
                                 <div class="card-body">
@@ -89,7 +89,7 @@
                                 </div>
                             </div>
                             </a>
-                        </div>
+                        </div> -->
                     
                         
                     </div>
@@ -109,7 +109,7 @@
                                     <div class="mt-4 text-center small">
                                         <span class="mr-2">
                                             <div id="scoreCircle" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block;">
-                                              
+                                          
                                             </div>
                                         </span>
                                         <span class="d-block"><b>Updated:</b> <span id="lastMonth"></span></span>
@@ -172,7 +172,7 @@
     {% if api_data %}
         var apiData = {{ api_data | tojson | safe }};
         var mobileNumber = {{ mobile_number }}; // Ensure this is a string
-        var score = parseInt(apiData.score);
+        var score = parseInt(apiData.JSCORE);
     {% else %}
         var apiData = null;
         var mobileNumber = "NA"; // Provide a default value

@@ -4,6 +4,7 @@ import logging
 import hashlib
 from markupsafe import escape
 import datetime
+from models.role_model import Role
 from models.user_model import User, db
 from models.agreement_model import Agreement
 from models.usersession_model import UserSession
@@ -28,6 +29,14 @@ def show_login():
 @user_bp.route('/login', methods=['POST'])
 def login():
     try:
+        with db.engine.connect() as conn:
+            conn.execute("SELECT 1")
+        logger.info("✅ Database connection successful during login.")
+    except Exception as db_err:
+        logger.error(f"❌ Database connection failed during login: {db_err}")
+        flash("Database connection error. Please try again later.")
+        #return render_template('error.html'), 500
+        
         # Prevent browser caching for this route
         response = make_response()
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
@@ -50,14 +59,26 @@ def login():
             Username=username,
             Password=hashlib.sha256(password.encode()).hexdigest()
         ).first()
+        
 
         if user:
+            business_role = Role.query.filter_by(Name="Business").first()
+            
+            if user.RoleId == business_role.RoleId: 
+                    session.clear()  # Clear the temporary session data
+                    session['userId'] = user.UserId
+                    session['username'] = user.Username
+                    session['RoleID'] = user.RoleId
+                    return redirect(url_for('businessusers.pending_changes')) 
             # Clear any previous session-related flags
             session.pop('failed_attempts', None)
 
             # Temporarily store user details until agreement
             session['temp_user_id'] = user.UserId
             session['temp_username'] = user.Username
+            session['temp_RoleID'] = user.RoleId
+            session.permanent = True
+            # print(session['RoleID'])
 
             # Redirect to privacy policy page for agreement
             return redirect(url_for('user.privacy_policy'))
@@ -120,6 +141,8 @@ def agree_privacy():
         # Retrieve the temporary user information
         temp_user_id = session.get('temp_user_id')
         temp_username = session.get('temp_username')
+        temp_RoleID = session.get('temp_RoleID')
+        
 
         if not temp_user_id or not temp_username:
             flash("Session expired or invalid. Please log in again.")
@@ -143,6 +166,7 @@ def agree_privacy():
         session['userId'] = temp_user_id
         session['username'] = temp_username
         session['agreementuserid'] = temp_user_id
+        session['RoleID'] = temp_RoleID
         session.permanent = False
 
         # log the agreement
@@ -150,7 +174,7 @@ def agree_privacy():
 
 
         # Redirect to the products page after agreeing to the privacy policy
-        return redirect(url_for('jscore.products'))
+        return redirect(url_for('jscore.index'))
 
     except Exception as e:
         logger.error(f"Error during agreement: {str(e)}")

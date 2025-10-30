@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Pending Plan Change Requests</h2>
+
+    {% if pending_requests  %}
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>User Email</th>
+                <th>Plan</th>
+                <th>Requested Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in pending_requests %}
+            <tr>
+                <td>{{ request.id }}</td>
+                <td>{{ request.user_email }}</td>
+                <td>{{ request.plan.name }}</td>
+                <td>{{ request.date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <select name="status" class="form-select status-dropdown" data-request-id="{{ request.id }}">
+                        <option value="pending" {% if request.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if request.status == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="rejected" {% if request.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                    <span id="status-message-{{ request.id }}" class="status-message"></span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-muted">No pending requests found.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".status-dropdown").forEach(function(dropdown) {
+            dropdown.addEventListener("change", function() {
+                let requestId = this.getAttribute("data-request-id");
+                let newStatus = this.value;
+                let statusMessage = document.getElementById("status-message-" + requestId);
+    
+                fetch("{{ url_for('businessusers.update_plan_status') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify({ request_id: requestId, status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    statusMessage.textContent = data.message;
+                    statusMessage.style.color = data.success ? "green" : "red";
+                })
+                .catch(error => {
+                    statusMessage.textContent = "Error updating status.";
+                    statusMessage.style.color = "red";
+                });
+            });
+        });
+    });
+    </script>
+{% endblock %}

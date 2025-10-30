@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ page_title }}</title>
+  </head>
+  <body>
+    <h2>{{ page_title }}</h2>
+    <form method="post">
+      <label>Enter Mobile Number:</label>
+      <input type="text" name="mobile_number" required />
+      <button type="submit">Send Consent Request</button>
+    </form>
+
+    {% if consent_result is not none %}
+    <h3>Consent Status for {{ mobile_number }}:</h3>
+    {% if consent_result == 1 %}
+    <p style="color: green">Consent Granted ✅</p>
+    {% elif consent_result == 2 %}
+    <p style="color: red">Consent Denied ❌</p>
+    {% elif consent_result == 3 %}
+    <p style="color: orange">No Response Received 🕐</p>
+    {% endif %} {% endif %}
+  </body>
+</html>
