@@ -1,185 +1,532 @@
 {% extends 'base.html' %} {% block content %}
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-
-
-                    <!-- Flash Messages -->
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                                {% for message in messages %}
-                                    {{ message }}
-                                {% endfor %}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+<!-- Dashboard Main Content -->
+<div class="dashboard-container">
+    
+    <!-- Flash Messages -->
+    <div class="dashboard-flash-messages" id="flash-messages-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'danger' or category == 'error' %}
+                        <div class="flash-message danger" role="alert" data-category="danger">
+                            <div class="flash-message-icon">
+                                <i class="fas fa-exclamation-circle"></i>
                             </div>
-                        {% endif %}
-                    {% endwith %}
-                    <!-- Page Heading -->
-                    <div class="form-group d-flex align-items-center justify-content-start">
-                        <form id="consent-form" action="{{ url_for('jscore.index') }}" method="POST" class="form-group d-flex align-items-center justify-content-start flex-wrap flex-sm-nowrap" onsubmit="handleConsentRequest(event)">
-                            <label for="mobile_number" class="align-items-center my-3 mr-2 d-none d-sm-inline-block" style="font-weight: bold; color: black; font-size: 0.875rem;">Mobile Number</label>
-                            <input type="text" name="mobile_number" class="form-control mx-sm-2 mb-2 mb-sm-0" id="mobile_number" placeholder="923XXXXXXXX" value="{{ mobile_number }}" style="width: auto; font-size: 0.875rem; color: black; margin-bottom: 0rem !important" required>
-                            <input type="submit" value="Submit" class="btn btn-dark ml-2 ml-sm-0" style="font-size: 0.875rem; padding: 5px 10px;">
-                        </form>
-                        
-                    </div>
-                    
-                    <div id="timer-popup" class="alert alert-info" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; z-index: 9999;">
-                        <strong>Please wait...</strong>
-                        <p>Timer: <span id="timer">10</span> seconds</p>
-                    </div>
-                    
-
-                    <!-- Content Row -->
-                    <div class="row">
-                        <!-- SIM AGE Card -->
-                        <!-- <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col-auto">
-                                            <i class="fas fa-thin fa-sim-card fa-2x text-gray-300"></i>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">SIM AGE</div>
-                                        </div>
-                                        <div class="col mr-6 px-4">
-                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">{{ sim_age }}</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="flash-message-content">
+                                <div class="flash-message-title">Error</div>
+                                <div class="flash-message-text">{{ message }}</div>
                             </div>
-                        </div> -->
-                    
-                        <!-- New Third Card -->
-                        <!-- <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col-auto">
-                                            <i class="fas fa-regular fa-bookmark fa-2x text-gray-300"></i>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">SIM INFO</div>
-                                        </div>
-                                        <div class="col mr-6 px-4">
-                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">{{ sim_info }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- Credit History Card -->
-                        <!-- <div class="col-xl-4 col-md-6 mb-4">
-                            <a href="{{ url_for('jscore.credithistory') }}" style="text-decoration: none;">
-                            <div class="card shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col-auto">
-                                            <i class="fas fa-history fa-2x text-gray-300"></i>
-                                            <div class="text-xs mb-0 font-weight-bold text-gray-800">HISTORY</div>
-                                        </div>
-                                        <div class="col mr-6 px-4">
-                                            <div class="h5 font-weight-bold text-gray-800 text-uppercase mb-1">View Jscore History</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-chevron-right fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            </a>
-                        </div> -->
-                    
-                        
-                    </div>
-                    
-                    <!-- End Content Row -->
-                    <div class="row">
-
-                        <!-- Area Chart -->
-                        <div class="col-xl-4 col-lg-5">
-                            <div class="card shadow mb-4">
-                               
-                                <!-- Card Body -->
-                                <div class="card-body">
-                                    <div class="chart-pie pt-4 pb-2">
-                                        <canvas id="myPieChart"> </canvas>
-                                    </div>
-                                    <div class="mt-4 text-center small">
-                                        <span class="mr-2">
-                                            <div id="scoreCircle" style="color: white; padding: 10px 20px; border-radius: 10px; display: inline-block;">
-                                          
-                                            </div>
-                                        </span>
-                                        <span class="d-block"><b>Updated:</b> <span id="lastMonth"></span></span>
-                                        <span class="d-block"><b>Next Update:</b> <span id="nextMonth"></span></span>
-
-                                </div>
-                                    
-                                </div>
-                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Close" onclick="dismissFlashMessage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        
-                        <div class="col-xl-8 col-lg-7">
-                            <div class="card shadow mb-4" style="padding-top: 50px; padding-bottom: 50px;"> <!-- Increase padding for a larger box -->
-                                <div class="card-body">
-                                    <div class="row">
-                                        <!-- Text Column -->
-                                        <div class="col-md-6 d-flex align-items-center justify-content-center">
-                                            <div class="d-flex flex-column">
-                                                <!-- Icon -->
-                                                <i class="fas fa-icons fa-2x mb-3 fa-tachometer-alt" style="color: rgb(18, 18, 18);"></i>
-                        
-                                                <!-- First Text -->
-                                                <h4 class="mb-1" style="color: rgb(18, 18, 18); font-size: 1.5rem;">Understand JScore</h4>
-                        
-                                                <!-- Second Text -->
-                                                <p style="font-size: 1rem; color: rgb(18, 18, 18);">Helps you interpret and gain a deeper understanding of JScore</p>
-                                            </div>
-                                        </div>
-                        
-                                        <!-- Image Column -->
-                                        <div class="col-md-6 text-center position-relative">
-                                            <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="max-width: 100%;" src="{{ url_for('static', filename='img/bands4.png') }}" alt="Bands">
-                                            <span class="tooltip">
-                                                <b>High risk:</b> Lacks sufficient or has adverse information predicting financial reliability.
-                                                <br><b>Challenges:</b> Potential for financial repayment difficulties.
-                                                <br><b>Generally reliable:</b> Occasional indicators of financial risk.
-                                                <br><b>Positive information:</b> Indicates reliability for financial commitments.
-                                                <br><b>Outstanding insights:</b> Strong predictor of financial reliability.
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                </div>
+                    {% elif category == 'warning' %}
+                        <div class="flash-message warning" role="alert" data-category="warning">
+                            <div class="flash-message-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
                             </div>
+                            <div class="flash-message-content">
+                                <div class="flash-message-title">Warning</div>
+                                <div class="flash-message-text">{{ message }}</div>
+                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Close" onclick="dismissFlashMessage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        
+                    {% elif category == 'info' %}
+                        <div class="flash-message info" role="alert" data-category="info">
+                            <div class="flash-message-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="flash-message-content">
+                                <div class="flash-message-title">Information</div>
+                                <div class="flash-message-text">{{ message }}</div>
+                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Close" onclick="dismissFlashMessage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% elif category == 'success' %}
+                        <div class="flash-message success" role="alert" data-category="success">
+                            <div class="flash-message-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="flash-message-content">
+                                <div class="flash-message-title">Success</div>
+                                <div class="flash-message-text">{{ message }}</div>
+                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Close" onclick="dismissFlashMessage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="flash-message warning" role="alert" data-category="warning">
+                            <div class="flash-message-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="flash-message-content">
+                                <div class="flash-message-text">{{ message }}</div>
+                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Close" onclick="dismissFlashMessage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
-                        <!-- Pie Chart -->
-                        
+    <script>
+        // Auto-dismiss flash messages after 8 seconds (except warnings which stay longer)
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                const category = message.getAttribute('data-category');
+                let dismissTime = 8000; // 8 seconds default
+                
+                // Warnings stay longer (12 seconds)
+                if (category === 'warning') {
+                    dismissTime = 12000;
+                }
+                // Success messages dismiss faster (5 seconds)
+                else if (category === 'success') {
+                    dismissTime = 5000;
+                }
+                
+                setTimeout(function() {
+                    dismissFlashMessage(message.querySelector('.flash-message-close'));
+                }, dismissTime);
+            });
+        });
+        
+        function dismissFlashMessage(button) {
+            const message = button.closest('.flash-message');
+            if (message) {
+                message.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(function() {
+                    message.remove();
+                }, 300);
+            }
+        }
+    </script>
+
+    <!-- Stats Overview Section -->
+    <div class="dashboard-stats-section">
+        <div class="row g-4">
+
+            <!-- Account Information Card -->
+            {% if subscription_type_name %}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="dashboard-stat-card stat-success">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-label">Subscription Plan</div>
+                        <div class="stat-card-value">{{ subscription_type_name }}</div>
+                        <div class="stat-card-footer">
+                            <small>{{ subscription_description }}</small>
+                        </div>
                     </div>
                 </div>
-                <!-- End of Main Content -->
-                  <!-- Footer -->
+            </div>
+            {% endif %}
+
+            <!-- Quota Information Card -->
+            {% if max_quota %}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="dashboard-stat-card stat-info">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-label">Monthly Quota</div>
+                        <div class="stat-card-value">{{ used_quota }} / {{ max_quota }}</div>
+                        <div class="stat-card-progress">
+                            <div class="progress-bar-fill" style="width: {{ quota_percentage }}%; background: {% if quota_percentage >= 80 %}var(--color-error){% elif quota_percentage >= 50 %}var(--color-secondary){% else %}var(--color-accent){% endif %};"></div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <small>{{ remaining_quota }} remaining ({{ "%.0f"|format(quota_percentage) }}% used)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- API Usage Statistics Card -->
+            {% if api_stats %}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="dashboard-stat-card stat-secondary">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-label">API Usage</div>
+                        <div class="stat-card-value">{{ api_stats.total_calls }} calls</div>
+                        <div class="stat-card-footer">
+                            <small>
+                                <span class="stat-success-rate" style="color: {% if api_stats.success_rate >= 80 %}var(--color-accent){% elif api_stats.success_rate >= 50 %}var(--color-secondary){% else %}var(--color-error){% endif %};">
+                                    {{ api_stats.success_rate }}% success
+                                </span>
+                                | {{ api_stats.monthly_calls }} this month
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Average Score Card -->
+            {% if api_stats and api_stats.avg_score > 0 %}
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="dashboard-stat-card stat-success">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <div class="stat-card-label">Average Score</div>
+                        <div class="stat-card-value">{{ api_stats.avg_score }}/10</div>
+                        <div class="stat-card-footer">
+                            <small>From {{ api_stats.successful_calls }} successful calls</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Combined Card: Input + Your Tekscore + Gauge -->
+    <div class="dashboard-combined-card-section">
+        <div class="dashboard-combined-card">
+            <!-- Input Section -->
+            <div class="combined-card-input-section">
+                <div class="combined-card-header">
+                    <h2 class="combined-card-title">
+                        <i class="fas fa-search"></i>
+                        Check Tekscore
+                    </h2>
+                    <p class="combined-card-subtitle">Enter a mobile number to get instant credit score analysis</p>
+                </div>
+                <form id="consent-form" action="{{ url_for('jscore.index') }}" method="POST" class="combined-card-form" onsubmit="handleConsentRequest(event)">
+                    <div class="combined-card-input-group">
+                        <div class="combined-card-icon-wrapper">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <input type="text" name="mobile_number" class="combined-card-input" id="mobile_number" placeholder="Enter mobile number (923XXXXXXXX)" value="{{ mobile_number }}" required>
+                        <button type="submit" class="combined-card-submit-btn">
+                            <span>Submit</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Assessment Details - Compact Version -->
+                <div class="combined-card-assessment-details">
+                    <div class="assessment-details-compact">
+                        <div class="assessment-detail-compact-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div class="assessment-detail-compact-content">
+                                <span class="assessment-detail-compact-label">Mobile</span>
+                                <span class="assessment-detail-compact-value">{{ mobile_number if mobile_number else 'Not submitted' }}</span>
+                            </div>
+                        </div>
+                        <div class="assessment-detail-compact-item">
+                            <i class="fas fa-bookmark"></i>
+                            <div class="assessment-detail-compact-content">
+                                <span class="assessment-detail-compact-label">SIM Info</span>
+                                <span class="assessment-detail-compact-value">{{ sim_info }}</span>
+                            </div>
+                        </div>
+                        <div class="assessment-detail-compact-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="assessment-detail-compact-content">
+                                <span class="assessment-detail-compact-label">Status</span>
+                                <span class="dashboard-status-badge schedule-score-badge assessment-detail-compact-value"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Your Tekscore Section - Middle Column Container -->
+            <div class="combined-card-tekscore-wrapper">
+                <!-- Your Tekscore Card -->
+                <div class="combined-card-tekscore-section">
+                    <div class="combined-card-tekscore-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h3 class="combined-card-tekscore-title">Your Tekscore</h3>
+                    </div>
+                    <div class="combined-card-tekscore-value" id="scoreCircle"></div>
+                    <div class="combined-card-tekscore-footer">
+                        <small>Updated: <span id="lastMonth"></span></small>
+                    </div>
+                </div>
+                
+                <!-- Understand Tekscore Compact Card -->
+                <div class="tekscore-guide-compact-card">
+                    <div class="tekscore-guide-compact-header">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="tekscore-guide-compact-title">Score Guide</span>
+                    </div>
+                    <div class="tekscore-gradient-bar-wrapper-compact">
+                        <div class="tekscore-gradient-bar-compact" id="tekscoreGradientBarCompact">
+                            <!-- Score Segments -->
+                            <div class="tekscore-segment-compact segment-highrisk-compact" data-range="0-2" data-category="High Risk" data-description="Lacks sufficient or has adverse information predicting financial reliability. Potential for financial repayment difficulties.">
+                                <div class="segment-fill-compact"></div>
+                                <div class="segment-tooltip-compact">
+                                    <div class="tooltip-arrow-compact"></div>
+                                    <div class="tooltip-content-compact">
+                                        <strong>High Risk (0-2)</strong>
+                                        <p>Lacks sufficient or has adverse information predicting financial reliability. Potential for financial repayment difficulties.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tekscore-segment-compact segment-challenging-compact" data-range="3-4" data-category="Challenging" data-description="Potential for financial repayment difficulties. Requires careful financial management.">
+                                <div class="segment-fill-compact"></div>
+                                <div class="segment-tooltip-compact">
+                                    <div class="tooltip-arrow-compact"></div>
+                                    <div class="tooltip-content-compact">
+                                        <strong>Challenging (3-4)</strong>
+                                        <p>Potential for financial repayment difficulties. Requires careful financial management.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tekscore-segment-compact segment-reliable-compact" data-range="5-6" data-category="Reliable" data-description="Generally reliable with occasional indicators of financial risk. Moderate creditworthiness.">
+                                <div class="segment-fill-compact"></div>
+                                <div class="segment-tooltip-compact">
+                                    <div class="tooltip-arrow-compact"></div>
+                                    <div class="tooltip-content-compact">
+                                        <strong>Reliable (5-6)</strong>
+                                        <p>Generally reliable with occasional indicators of financial risk. Moderate creditworthiness.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tekscore-segment-compact segment-positive-compact" data-range="7-8" data-category="Positive" data-description="Positive information indicates reliability for financial commitments. Good credit standing.">
+                                <div class="segment-fill-compact"></div>
+                                <div class="segment-tooltip-compact">
+                                    <div class="tooltip-arrow-compact"></div>
+                                    <div class="tooltip-content-compact">
+                                        <strong>Positive (7-8)</strong>
+                                        <p>Positive information indicates reliability for financial commitments. Good credit standing.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tekscore-segment-compact segment-outstanding-compact" data-range="9-10" data-category="Outstanding" data-description="Outstanding insights with strong predictor of financial reliability. Excellent creditworthiness.">
+                                <div class="segment-fill-compact"></div>
+                                <div class="segment-tooltip-compact">
+                                    <div class="tooltip-arrow-compact"></div>
+                                    <div class="tooltip-content-compact">
+                                        <strong>Outstanding (9-10)</strong>
+                                        <p>Outstanding insights with strong predictor of financial reliability. Excellent creditworthiness.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Current Score Indicator -->
+                            <div class="current-score-indicator-compact" id="currentScoreIndicatorCompact" style="display: none;">
+                                <div class="indicator-dot-compact"></div>
+                                <div class="indicator-line-compact"></div>
+                                <div class="indicator-label-compact">Your Score</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Labels Below Bar -->
+                        <div class="tekscore-labels-compact">
+                            <div class="tekscore-label-item-compact">
+                                <span class="label-range-compact">0-2</span>
+                                <span class="label-category-compact">High</span>
+                            </div>
+                            <div class="tekscore-label-item-compact">
+                                <span class="label-range-compact">3-4</span>
+                                <span class="label-category-compact">Challenging</span>
+                            </div>
+                            <div class="tekscore-label-item-compact">
+                                <span class="label-range-compact">5-6</span>
+                                <span class="label-category-compact">Reliable</span>
+                            </div>
+                            <div class="tekscore-label-item-compact">
+                                <span class="label-range-compact">7-8</span>
+                                <span class="label-category-compact">Positive</span>
+                            </div>
+                            <div class="tekscore-label-item-compact">
+                                <span class="label-range-compact">9-10</span>
+                                <span class="label-category-compact">Outstanding</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tekscore Gauge Section -->
+            <div class="combined-card-gauge-section">
+                <div class="combined-card-gauge-header">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3 class="combined-card-gauge-title">Tekscore Gauge</h3>
+                </div>
+                <div class="combined-card-gauge-container">
+                    <canvas id="myPieChart"></canvas>
+                </div>
+                <div class="combined-card-gauge-info">
+                    <div class="combined-gauge-info-item">
+                        <span class="combined-gauge-label">Last Updated:</span>
+                        <span class="combined-gauge-value chart-last-month"></span>
+                    </div>
+                    <div class="combined-gauge-info-item">
+                        <span class="combined-gauge-label">Next Update:</span>
+                        <span class="combined-gauge-value chart-next-month"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consent Confirmation Modal -->
+    <div id="consent-modal" class="consent-modal-overlay" style="display: none;">
+        <div class="consent-modal-container">
+            <div class="consent-modal-header">
+                <div class="consent-modal-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="consent-modal-title">Consent Request</h3>
+            </div>
+            <div class="consent-modal-body">
+                <p class="consent-modal-message">
+                    A message will be sent to this user asking for their consent. Do you want to proceed?
+                </p>
+            </div>
+            <div class="consent-modal-footer">
+                <button type="button" class="consent-modal-btn consent-modal-btn-cancel" id="consent-cancel-btn">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+                <button type="button" class="consent-modal-btn consent-modal-btn-confirm" id="consent-confirm-btn">
+                    <i class="fas fa-check"></i>
+                    <span>Proceed</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Popup -->
+    <div id="timer-popup" class="dashboard-timer-popup" style="display: none;">
+        <div class="dashboard-timer-content">
+            <div class="dashboard-timer-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <strong>Please wait...</strong>
+            <p>Timer: <span id="timer">10</span> seconds</p>
+        </div>
+    </div>
+
+    <!-- Analytics Details Section -->
+    <div class="dashboard-main-section">
+        <div class="row g-4">
+            <!-- Recent Activity Card -->
+            {% if api_stats and api_stats.recent_calls %}
+            <div class="col-xl-6 col-lg-12">
+                <div class="dashboard-card-modern">
+                    <div class="dashboard-card-modern-header">
+                        <div class="dashboard-card-modern-icon-wrapper">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-modern-title">Recent Activity</h3>
+                            <p class="dashboard-card-modern-subtitle">Last API calls</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-modern-body">
+                        <div class="recent-activity-list">
+                            {% for call in api_stats.recent_calls[:7] %}
+                            <div class="activity-item">
+                                <div class="activity-item-icon">
+                                    <i class="fas fa-{% if call.status %}check-circle{% else %}times-circle{% endif %}" style="color: {% if call.status %}var(--color-accent){% else %}var(--color-error){% endif %};"></i>
+                                </div>
+                                <div class="activity-item-content">
+                                    <div class="activity-item-main">
+                                        <span class="activity-mobile">{{ call.mobile }}</span>
+                                        {% if call.status and call.score %}
+                                        <span class="activity-score">Score: {{ call.score }}/10</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-item-meta">
+                                        <span class="activity-time">{{ call.timestamp }}</span>
+                                        <span class="activity-status {% if call.status %}status-success{% else %}status-failed{% endif %}">
+                                            {% if call.status %}Success{% else %}Failed{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quota History Card -->
+            {% if quota_history %}
+            <div class="col-xl-6 col-lg-12">
+                <div class="dashboard-card-modern">
+                    <div class="dashboard-card-modern-header">
+                        <div class="dashboard-card-modern-icon-wrapper">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-modern-title">Quota History</h3>
+                            <p class="dashboard-card-modern-subtitle">Last 6 months usage</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-modern-body">
+                        <div class="quota-history-list">
+                            {% for qh in quota_history %}
+                            <div class="quota-history-item">
+                                <div class="quota-history-month">
+                                    {% set month_names = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] %}
+                                    {{ month_names[qh.month] }} {{ qh.year }}
+                                </div>
+                                <div class="quota-history-usage">
+                                    <div class="quota-history-bar">
+                                        <div class="quota-history-bar-fill" style="width: {{ qh.percentage }}%; background: {% if qh.percentage >= 80 %}var(--color-error){% elif qh.percentage >= 50 %}var(--color-secondary){% else %}var(--color-accent){% endif %};"></div>
+                                    </div>
+                                    <div class="quota-history-details">
+                                        <span class="quota-history-used">{{ qh.used }} / {{ qh.max }}</span>
+                                        <span class="quota-history-percentage">{{ "%.0f"|format(qh.percentage) }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if not quota_history %}
+                            <div class="quota-history-empty">
+                                <p>No quota history available</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+</div>
+
 {% endblock %}
-
-
 
 {% block script %}
 <script>
     {% if api_data %}
         var apiData = {{ api_data | tojson | safe }};
-        var mobileNumber = {{ mobile_number }}; // Ensure this is a string
+        var mobileNumber = {{ mobile_number }};
         var score = parseInt(apiData.JSCORE);
     {% else %}
         var apiData = null;
-        var mobileNumber = "NA"; // Provide a default value
+        var mobileNumber = "NA";
         var score = null;
     {% endif %}
-
-
 
     // Get today's date
     const today = new Date();
@@ -201,39 +548,95 @@
 
     // Insert the formatted dates into the HTML
     document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('lastMonth').textContent = lastMonthFormatted;
-        document.getElementById('nextMonth').textContent = nextMonthFormatted;
+        // Update main card date
+        const lastMonthEl = document.getElementById('lastMonth');
+        if (lastMonthEl) lastMonthEl.textContent = lastMonthFormatted;
+        
+        // Update chart dates
+        const chartLastMonth = document.querySelector('.chart-last-month');
+        const chartNextMonth = document.querySelector('.chart-next-month');
+        if (chartLastMonth) chartLastMonth.textContent = lastMonthFormatted;
+        if (chartNextMonth) chartNextMonth.textContent = nextMonthFormatted;
+        
+        // Update schedule dates
+        const scheduleLastMonth = document.querySelector('.schedule-last-month');
+        const scheduleNextMonth = document.querySelector('.schedule-next-month');
+        if (scheduleLastMonth) scheduleLastMonth.textContent = lastMonthFormatted;
+        if (scheduleNextMonth) scheduleNextMonth.textContent = nextMonthFormatted;
+        
+        // Update schedule score badge (copy from main scoreCircle)
+        const scoreCircle = document.getElementById('scoreCircle');
+        const scheduleScoreBadge = document.querySelector('.schedule-score-badge');
+        if (scoreCircle && scheduleScoreBadge) {
+            scheduleScoreBadge.innerHTML = scoreCircle.innerHTML;
+        }
+        
+        // Position current score indicator on gradient bar
+        if (score !== null && score !== undefined && !isNaN(score)) {
+            const indicator = document.getElementById('currentScoreIndicator');
+            const gradientBar = document.getElementById('tekscoreGradientBar');
+            
+            if (indicator && gradientBar) {
+                // Calculate position based on score (0-10 scale)
+                // Score 0 = 0%, Score 10 = 100%
+                const percentage = (score / 10) * 100;
+                
+                // Ensure percentage is within bounds
+                const clampedPercentage = Math.max(0, Math.min(100, percentage));
+                
+                // Set position
+                indicator.style.left = clampedPercentage + '%';
+                indicator.style.display = 'flex';
+            }
+        }
     });
 
     // Confirmation and Timer Workflow
     function handleConsentRequest(event) {
         event.preventDefault();
 
-        // First confirmation popup
-        const confirmConsent = confirm("A message will be sent to this user asking for their consent. Do you want to proceed?");
-        if (confirmConsent) {
-            // Display the timer popup
-            const timerPopup = document.getElementById("timer-popup");
-            timerPopup.style.display = "block";
-
-            let timeLeft = 10; // Timer duration in seconds
-            const timerElement = document.getElementById("timer");
-            timerElement.textContent = `${timeLeft}`;
-
-            // Countdown logic
-            const countdown = setInterval(() => {
-                timeLeft -= 1;
-                timerElement.textContent = `${timeLeft}`;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerPopup.style.display = "none";
-                    // Submit the form after timer ends
-                    document.getElementById("consent-form").submit();
-                }
-            }, 1000);
-        }
+        // Show custom consent modal
+        const consentModal = document.getElementById("consent-modal");
+        consentModal.style.display = "flex";
     }
-    
-</script>
 
+    // Handle consent modal buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const consentModal = document.getElementById("consent-modal");
+        const confirmBtn = document.getElementById("consent-confirm-btn");
+        const cancelBtn = document.getElementById("consent-cancel-btn");
+
+        // Confirm button - proceed with submission
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                consentModal.style.display = "none";
+                // Submit the form
+                document.getElementById("consent-form").submit();
+            });
+        }
+
+        // Cancel button - close modal
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                consentModal.style.display = "none";
+            });
+        }
+
+        // Close modal when clicking outside
+        if (consentModal) {
+            consentModal.addEventListener('click', function(e) {
+                if (e.target === consentModal) {
+                    consentModal.style.display = "none";
+                }
+            });
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && consentModal.style.display === 'flex') {
+                consentModal.style.display = "none";
+            }
+        });
+    });
+</script>
 {% endblock %}

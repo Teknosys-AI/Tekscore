@@ -6,196 +6,139 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="Jazz">
+    <meta name="author" content="Tekscore">
 
-    <title>Jazz</title>
+    <title>Tekscore</title>
 
     <!-- Custom fonts for this template-->
     {% block css %}{% endblock %}
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link rel="icon" href="{{ url_for('static', filename='Assets/logo.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/logo-icon.png') }}" type="image/png">
     
 
     {% block extraheaderlinks %}{% endblock %}
     <!-- Custom styles for this template-->
     <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 
 <body id="page-top">
 
     <!-- Page Wrapper -->
-    <div id="wrapper">
+    <div id="wrapper" class="sidebar-wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-dark sidebar sidebar-dark accordion" id="accordionSidebar">
-            <li style="padding-top: 20px; padding-bottom: 20px;">
-                <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('jscore.index') }}">
-                    <div> 
-                        <img src="{{ url_for('static', filename='Assets/logo.png') }}" width="50%" height="auto" >
-                    </div>
-                </a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                 <!-- <li class="nav-item active "> -->
-                <!-- <a class="nav-link " href="{{ url_for('jscore.index') }}" data-toggle="collapse" data-target="#CreditScore" aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>JScore</span>
-                </a> -->
-
-
-                 <a class="nav-link " href="{{ url_for('jscore.index') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>JScore</span>
-                </a>
-                <!-- <div id="CreditScore" class="collapse " aria-labelledby="CreditScore" data-parent="#accordionSidebar">
-                    <div class="bg-dark py-2 collapse-inner rounded ">
-                        
-                        <a class="collapse-item text-light BLACKMENU" href="{{ url_for('jscore.credithistory') }}">
-                            <i class="fas fa-fw fa-history"></i>
-                            <span>History</span>
-                        </a>
-                        <a class="collapse-item text-light" href="{{ url_for('jscore.credithithistory') }}">
-                            <i class="fas fa-fw fa-history"></i>
-                            <span>Package History</span>
-                        </a>
-                    </div>
-                </div> -->
-            </li>
-
-            <!-- Divider -->
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('jscore.products') }}">
-                    <i class="fas fa-fw fa-shopping-bag"></i>
-                    <span>Products</span>
-                </a>
-            </li> -->
-
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('jscore.billingandpayments') }}">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Billing & Payments</span>
-                </a>
-            </li> -->
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('jscore.myaccount') }}">
-                    <i class="fas fa-fw fa-user-circle"></i>
-                    <span>My Account</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('jscore.help_page') }}">
-                    <i class="fas fa-fw fa-question"></i>
-                    <span>Help</span>
-                </a>
-            </li>
-
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('jscore.contactus') }}">
-                    <i class="fas fa-fw fa-phone" style="transform: rotate(90deg);"></i>
-                    <span>Contact Us</span>
-                </a>
-            </li> -->
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        <nav class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <!-- T Logo (shown when collapsed) -->
+                <div class="sidebar-t-logo" id="sidebarTLogo">
+                    <span class="logo-t-box sidebar-t-only">T</span>
+                </div>
+                <!-- Menu Title (shown when expanded) -->
+                <div class="brand-section" id="brandSection">
+                    <span class="sidebar-menu-title">Menu</span>
+                </div>
+                <button class="close-button" id="closeButton" aria-label="Close sidebar" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-        </ul>
+
+            <!-- Navigation Sections -->
+            <div class="nav-sections">
+                <!-- Main Navigation -->
+                <div class="nav-section">
+                    <ul class="nav-links">
+                        <li class="{% if request.endpoint == 'jscore.index' %}active{% endif %}">
+                            <a href="{{ url_for('jscore.index') }}" class="nav-link">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="{% if request.endpoint == 'jscore.credithistory' %}active{% endif %}">
+                            <a href="{{ url_for('jscore.credithistory') }}" class="nav-link">
+                                <i class="fas fa-history"></i>
+                                <span>Credit History</span>
+                            </a>
+                        </li>
+                        <li class="{% if request.endpoint == 'jscore.changepassword' %}active{% endif %}">
+                            <a href="{{ url_for('jscore.changepassword') }}" class="nav-link">
+                                <i class="fas fa-key"></i>
+                                <span>Change Password</span>
+                            </a>
+                        </li>
+                        <li class="{% if request.endpoint == 'jscore.show_help_page' %}active{% endif %}">
+                            <a href="{{ url_for('jscore.show_help_page') }}" class="nav-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer - Help Icon -->
+            <div class="sidebar-footer">
+                <button class="help-icon-button" type="button" aria-label="Contact support or view documentation" title="Need help? Reach out to support or view documentation.">
+                    <i class="fas fa-question help-icon"></i>
+                </button>
+            </div>
+        </nav>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
-
+        <div id="content-wrapper" class="sidebar-content-wrapper">
             <!-- Main Content -->
-            <div id="content">
-
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow ">
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
-                    <div class="d-sm-flex align-items-center justify-content-between" style="display: flex; align-items: center; align-self: center;">
-                        <h1 class="h3 mb-0 text-gray-800"><b>{{ page_title }}</b></h1>
+            <div id="content" class="sidebar-main-content">
+                <!-- Page Header -->
+                <div class="content-header">
+                    <div class="content-header-left">
+                        {% if page_title == 'Dashboard' %}
+                        <div class="content-title-logo">
+                            <span class="inline-tekscore-logo header-tekscore-logo">
+                                <span class="logo-t-box">T</span>
+                                <span class="logo-ek">EK</span>
+                                <span class="logo-score">SCORE</span>
+                            </span>
+                        </div>
+                        {% else %}
+                        <h1 class="content-title">{{ page_title }}</h1>
+                        {% endif %}
                     </div>
-
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img class="img-profile rounded-circle mr-2" 
-                                    src="{{ url_for('static', filename='img/user.png') }}" 
-                                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/userdefault.png') }}';"
-                                >
-
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{session['username']}}</span>
-                                <span class="ml-auto d-none d-lg-inline"><i class="fas fa-chevron-down"></i></span>
+                    <div class="content-header-right">
+                        <div class="header-account-menu">
+                            <a href="{{ url_for('jscore.myaccount') }}" class="header-account-link {% if request.endpoint == 'jscore.myaccount' %}active{% endif %}" title="My Account">
+                                <i class="fas fa-user-circle"></i>
+                                <span>My Account</span>
                             </a>
-                            
-                            
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{{ url_for('jscore.myaccount') }}">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ url_for('user.logout') }}" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </nav>
-                <!-- End of Topbar -->
-
-
-
-                {% block content %}{% endblock %}
-
-
-
-
-
-
-
-                <footer class="sticky-footer bg-white">
-                    <div class="container my-auto">
-                        <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; JSCORES <span id="year"></span></span>
+                            <a href="{{ url_for('user.logout') }}" class="header-account-link" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
                         </div>
                     </div>
-                </footer>
-                <!-- End of Footer -->
-    
                 </div>
-                <!-- End of Content Wrapper -->
-    
+
+                {% block content %}{% endblock %}
             </div>
-            <!-- End of Page Wrapper -->
+            <!-- End of Main Content -->
+
+
+
+
+
+
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
     
             <!-- Logout Modal-->
             <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
@@ -245,9 +188,8 @@
             </script> -->
             <script src="{{ url_for('static', filename='js/charts/chart-pie-demo.js') }}"></script>
             <script src="{{ url_for('static', filename='js/charts/chart-area-demo.js') }}"></script>
+            <script src="{{ url_for('static', filename='js/dashboard-sidebar.js') }}"></script>
 
-
-    
         </div>
     </body>
 

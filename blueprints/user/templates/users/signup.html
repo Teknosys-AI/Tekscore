@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Tekscore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/logo-icon.png') }}" type="image/png">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <!-- Left Side: Decorative Section -->
+            <div class="login-decorative">
+                <div class="gradient-background">
+                    <div class="bubble bubble-1"></div>
+                    <div class="bubble bubble-2"></div>
+                    <div class="bubble bubble-3"></div>
+                    <div class="bubble bubble-4"></div>
+                    <div class="bubble bubble-5"></div>
+                </div>
+                <img
+                    class="login-decorative-image"
+                    src="{{ url_for('static', filename='img/LOGINIMAGE.png') }}"
+                    alt="Illustration"
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.style.display='none'"
+                />
+            </div>
+            
+            <!-- Right Side: Form Section -->
+            <div class="login-form-section">
+                <div class="login-content">
+                    <!-- Logo Section -->
+                    <div class="login-logo logo-container">
+                        <a href="{{ url_for('landing.index') }}" class="tekscore-logo">
+                            <span class="inline-tekscore-logo">
+                                <span class="logo-t-box">T</span>
+                                <span class="logo-ek">EK</span>
+                                <span class="logo-score">SCORE</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Header Section -->
+                    <div class="login-header">
+                        <p class="login-subtitle">Join Tekscore</p>
+                        <h1 class="login-title">Sign Up</h1>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                {% if category == 'danger' or category == 'error' %}
+                                    <div class="error-message error-message-danger">{{ message }}</div>
+                                {% elif category == 'warning' %}
+                                    <div class="error-message error-message-warning">{{ message }}</div>
+                                {% elif category == 'info' %}
+                                    <div class="error-message error-message-info">{{ message }}</div>
+                                {% elif category == 'success' %}
+                                    <div class="error-message error-message-success">{{ message }}</div>
+                                {% else %}
+                                    <div class="error-message">{{ message }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Placeholder Content -->
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <p style="color: var(--text-color-muted); font-size: 1rem; margin-bottom: 24px;">
+                            Registration is currently under development. Please contact your administrator for account access.
+                        </p>
+                        <a href="{{ url_for('user.show_login') }}" class="btn-primary" style="display: inline-block; text-decoration: none;">
+                            Back to Sign In
+                        </a>
+                    </div>
+
+                    <!-- Footer Section -->
+                    <div class="login-footer">
+                        <p class="desktop-text">
+                            Already have an account?
+                            <a href="{{ url_for('user.show_login') }}" class="signup-link">Sign in</a>
+                        </p>
+                        <p class="mobile-text">
+                            Already have an account?
+                            <a href="{{ url_for('user.show_login') }}" class="signup-link">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

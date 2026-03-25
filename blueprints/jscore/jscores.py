@@ -15,10 +15,12 @@ from datetime import datetime, timedelta
 from models.product_model import Product
 from models.user_product import UserProducts
 from models.changeplan_model import ChangePlan
+from models.agreement_model import Agreement
 from blueprints.tasks.tasks import role_required
 from models.subscriptiontype_model import SubscriptionType
 from ..api_util.api_utils import call_Jscore_api_function, call_JscoreHistory_api_function
 from flask import Blueprint, Flask, jsonify, render_template, request, redirect, url_for, flash, session, abort
+from utils.error_handler import ErrorHandler
 
 # Create a Blueprint for the JScore-related routes
 jscore_bp = Blueprint("jscore", __name__, template_folder="templates/jscore")
@@ -66,28 +68,198 @@ def index():
         if 'userId'not in session or 'agreementuserid' not in session:
             return redirect(url_for('user.show_login'))
         if request.method == 'GET':
+            # Check if we have API data from a previous POST (for Post/Redirect/Get pattern)
+            show_results = session.get('show_results', False)
+            api_data = None
+            mobile_number = ''
             sim_age = 'NA'
             sim_info = 'NA'
+            
+            # Only use session data if show_results flag is set (from recent POST)
+            if show_results:
+                api_data = session.get('api_data')
+                mobile_number = session.get('mobile_number', '')
+                sim_age = session.get('sim_age', 'NA')
+                sim_info = session.get('sim_info', 'NA')
+                
+                # Clear the session data after using it to prevent stale data on refresh
+                session.pop('show_results', None)
+                # Note: We keep api_data, mobile_number, sim_age, sim_info in session
+                # in case user wants to see them again, but they'll be overwritten on next POST
+            
+            # Get user quota information
+            user_id = session.get('userId')
+            current_month = datetime.now().month
+            current_year = datetime.now().year
+            
+            # Initialize variables
+            subscription_type_name = None
+            subscription_description = None
+            max_quota = None
+            used_quota = None
+            remaining_quota = None
+            quota_percentage = 0
+            
+            # Analytics data
+            quota_history = []
+            api_stats = {
+                'total_calls': 0,
+                'monthly_calls': 0,
+                'success_rate': 0.0,
+                'successful_calls': 0,
+                'failed_calls': 0,
+                'avg_score': 0.0,
+                'recent_calls': [],
+                'daily_usage': []
+            }
+            account_activity = {
+                'last_agreement_date': None,
+                'total_agreements': 0
+            }
+            
+            # Get jscore product
+            jscore_product = db.session.query(Product).filter_by(name='jscore').first()
+            
+            if user_id and jscore_product:
+                # Get user's quota for current month
+                quota = Quota.query.filter_by(
+                    UserId=user_id,
+                    ProductId=jscore_product.id,
+                    Month=current_month,
+                    Year=current_year
+                ).first()
+                
+                if quota:
+                    max_quota = quota.MaxQuota
+                    used_quota = quota.UsedQuota
+                    remaining_quota = quota.MaxQuota - quota.UsedQuota
+                    quota_percentage = round((quota.UsedQuota / quota.MaxQuota * 100), 1) if quota.MaxQuota > 0 else 0
+                
+                # Get quota history (last 6 months)
+                six_months_ago = datetime.now() - timedelta(days=180)
+                quota_history_records = Quota.query.filter(
+                    Quota.UserId == user_id,
+                    Quota.ProductId == jscore_product.id
+                ).order_by(Quota.Year.desc(), Quota.Month.desc()).limit(6).all()
+                
+                for q in quota_history_records:
+                    quota_history.append({
+                        'month': q.Month,
+                        'year': q.Year,
+                        'max': q.MaxQuota,
+                        'used': q.UsedQuota,
+                        'percentage': round((q.UsedQuota / q.MaxQuota * 100), 1) if q.MaxQuota > 0 else 0
+                    })
+                
+                # Get user's subscription type
+                user = User.query.filter_by(UserId=user_id).first()
+                if user and user.subscription_type_id:
+                    subscription = SubscriptionType.query.filter_by(Id=user.subscription_type_id).first()
+                    if subscription:
+                        subscription_type_name = subscription.subscriptiontype
+                        subscription_description = subscription.description
+                
+                # Get API usage statistics
+                all_api_hits = APIHit.query.filter_by(
+                    user_id=user_id,
+                    product_id=jscore_product.id
+                ).order_by(APIHit.timestamp.desc()).all()
+                
+                if all_api_hits:
+                    # Total calls
+                    api_stats['total_calls'] = len(all_api_hits)
+                    
+                    # Monthly calls
+                    monthly_hits = [h for h in all_api_hits if h.month == current_month and h.timestamp.year == current_year]
+                    api_stats['monthly_calls'] = len(monthly_hits)
+                    
+                    # Success/failure counts
+                    successful_hits = [h for h in all_api_hits if h.status == True]
+                    failed_hits = [h for h in all_api_hits if h.status == False]
+                    api_stats['successful_calls'] = len(successful_hits)
+                    api_stats['failed_calls'] = len(failed_hits)
+                    
+                    # Success rate
+                    if api_stats['total_calls'] > 0:
+                        api_stats['success_rate'] = round((api_stats['successful_calls'] / api_stats['total_calls']) * 100, 1)
+                    
+                    # Average score (from successful calls with scores)
+                    scores = [h.score for h in successful_hits if h.score is not None]
+                    if scores:
+                        api_stats['avg_score'] = round(sum(scores) / len(scores), 1)
+                    
+                    # Recent calls (last 10)
+                    recent_hits = all_api_hits[:10]
+                    for hit in recent_hits:
+                        # Mask mobile number (show only last 4 digits)
+                        mobile = str(hit.mobile_number)
+                        if len(mobile) > 4:
+                            masked_mobile = '****' + mobile[-4:]
+                        else:
+                            masked_mobile = mobile
+                        
+                        api_stats['recent_calls'].append({
+                            'timestamp': hit.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                            'mobile': masked_mobile,
+                            'status': hit.status,
+                            'score': hit.score
+                        })
+                    
+                    # Daily usage (last 7 days)
+                    seven_days_ago = datetime.now() - timedelta(days=7)
+                    daily_hits = {}
+                    for hit in all_api_hits:
+                        if hit.timestamp >= seven_days_ago:
+                            date_key = hit.timestamp.strftime('%Y-%m-%d')
+                            daily_hits[date_key] = daily_hits.get(date_key, 0) + 1
+                    
+                    # Sort by date
+                    for date_key in sorted(daily_hits.keys(), reverse=True)[:7]:
+                        api_stats['daily_usage'].append({
+                            'date': date_key,
+                            'calls': daily_hits[date_key]
+                        })
+                
+                # Get account activity
+                agreements = Agreement.query.filter_by(UserId=user_id).order_by(Agreement.agreement_time.desc()).all()
+                if agreements:
+                    account_activity['total_agreements'] = len(agreements)
+                    account_activity['last_agreement_date'] = agreements[0].agreement_time.strftime('%Y-%m-%d %H:%M:%S')
 
             return render_template(
                         'index1.html', 
+                        api_data=api_data,  # Include API data if available from session
+                        mobile_number=mobile_number,  # Include mobile number if available
                         sim_age=sim_age, 
                         sim_info=sim_info, 
-                        page_title='JScore'
+                        page_title='Dashboard',
+                        subscription_type_name=subscription_type_name,
+                        subscription_description=subscription_description,
+                        max_quota=max_quota,
+                        used_quota=used_quota,
+                        remaining_quota=remaining_quota,
+                        quota_percentage=quota_percentage,
+                        quota_history=quota_history,
+                        api_stats=api_stats,
+                        account_activity=account_activity
                         )
         # Handle form submission with POST request
         if request.method == 'POST':
+            # Get mobile number from form
+            mobile_number_raw = request.form.get('mobile_number', '').strip()
+            
+            # Validate mobile number using ErrorHandler
+            is_valid, validation_error = ErrorHandler.validate_mobile_number(mobile_number_raw)
+            if not is_valid:
+                flash(validation_error, 'danger')
+                return redirect(url_for('jscore.index', page_title='Dashboard'))
+            
             # Clean the mobile number input to prevent XSS attacks
-            mobile_number = bleach.clean(request.form.get('mobile_number'))
-
+            mobile_number = bleach.clean(mobile_number_raw)
+            
             # Standardize the mobile number format (convert '0' prefix to '92')
             if mobile_number.startswith('0'):
                 mobile_number = '92' + mobile_number[1:]
-
-            # Validate the length of the mobile number based on its prefix
-            if (mobile_number.startswith('0') and len(mobile_number) != 11) or (mobile_number.startswith('92') and len(mobile_number) != 12):
-                flash('Invalid mobile number length. It must be 11 characters long if starting with 0, or 12 characters long if starting with 92.')
-                return redirect(url_for('jscore.index', page_title='JScore'))
 
             # Fetch the current user from the database using the UserId from the session
             # Get the current date and extract the month and year
@@ -96,28 +268,67 @@ def index():
             current_date = datetime.now()
             current_month = current_date.month
             current_year = current_date.year
+            
+            # Get jscore product
             jscore_product = db.session.query(Product).filter_by(name='jscore').first()
             if not jscore_product:
-                return "JScore product not found", 404  # Handle case if product is not found
+                flash('JScore product is not configured. Please contact support.', 'danger')
+                logger.error("JScore product not found in database")
+                return redirect(url_for('jscore.index', page_title='JScore'))
+            
+            # Get user
             users = User.query.filter_by(UserId=session['userId']).first()
-            # quota = Quota.query.filter_by(UserId=users.UserId).first()
+            if not users:
+                flash('User not found. Please log in again.', 'danger')
+                logger.error(f"User not found for UserId: {session['userId']}")
+                return redirect(url_for('user.show_login'))
+            
+            # Get subscription type
+            subscription_type = SubscriptionType.query.filter_by(Id=users.subscription_type_id).first()
+            if not subscription_type:
+                flash('Your account subscription type is not configured. Please contact support.', 'danger')
+                logger.error(f"Subscription type not found for user {users.UserId}")
+                return redirect(url_for('jscore.index', page_title='JScore'))
+            
+            # Get quota for current month
             quota = db.session.query(Quota).filter_by(
                         UserId=users.UserId,
                         ProductId=jscore_product.id,
                         Month=current_month,
                         Year=current_year
                     ).first()
-            subscription_type = SubscriptionType.query.filter_by(Id=users.subscription_type_id).first()
 
             # Check if the user subscription is Prepaid or Postpaid
             if subscription_type.subscriptiontype.lower() == 'prepaid':
+                # Check if quota exists for current month
+                if not quota:
+                    quota_error_msg = ErrorHandler.get_quota_error_message(None, None, None)
+                    flash(quota_error_msg, 'warning')
+                    logger.warning(f"No quota found for UserId: {users.UserId}, Month: {current_month}, Year: {current_year}")
+                    return redirect(url_for('jscore.index', page_title='Dashboard'))
+                
+                # Check quota percentage for warning
+                quota_percentage = round((quota.UsedQuota / quota.MaxQuota * 100), 1) if quota.MaxQuota > 0 else 0
+                quota_warning_msg = ErrorHandler.get_quota_error_message(quota, quota.MaxQuota, quota.UsedQuota, quota_percentage)
+                if quota_warning_msg and quota.UsedQuota < quota.MaxQuota:
+                    # This is a warning (80%+ but not exhausted), show as warning
+                    flash(quota_warning_msg, 'warning')
+                
                 # Check if the user has remaining quota
                 if quota.UsedQuota >= quota.MaxQuota:
-                    flash('Quota limit reached. You cannot make more requests.')
-                    return redirect(url_for('jscore.index', page_title='JScore'))
+                    quota_error_msg = ErrorHandler.get_quota_error_message(quota, quota.MaxQuota, quota.UsedQuota, quota_percentage)
+                    flash(quota_error_msg, 'warning')
+                    return redirect(url_for('jscore.index', page_title='Dashboard'))
+                
+                # Check if user has valid token before API call
+                if not users.Token or not users.Token.strip():
+                    token_error_msg = ErrorHandler.get_token_error_message('missing')
+                    flash(token_error_msg, 'danger')
+                    logger.error(f"User {users.UserId} ({users.Username}) has no token before API call")
+                    return redirect(url_for('jscore.index', page_title='Dashboard'))
 
                 
-                 # Check if the user is authorized (RoleId == 1)
+                 # Check if the user is authorized (RoleId == 1 for Jscore users)
                 if users and users.RoleId == 1: 
                     
                     # Call the external API to retrieve the score and related data
@@ -129,6 +340,7 @@ def index():
                         # Log
                         logger.info(f"API call was successful for UserId: {users.UserId}, Username: {users.Username}, for MobileNumber: {mobile_number}")
                         
+                        # Increment quota only after successful API call
                         quota.UsedQuota += 1
                         score = api_data.get('JSCORE')
                         if score is not None and score != 0:
@@ -148,9 +360,19 @@ def index():
                                         score = score
                                     )
 
-                        # Add the APIHit record to the session and commit all changes
-                        db.session.add(api_hit)
-                        db.session.commit()
+                        # Add the APIHit record to the session and commit all changes with error handling
+                        try:
+                            db.session.add(api_hit)
+                            db.session.commit()
+                        except Exception as db_error:
+                            # Rollback on database error
+                            db.session.rollback()
+                            error_msg = ErrorHandler.format_database_error(db_error)
+                            flash(error_msg, 'danger')
+                            logger.error(f"Database error while saving API hit for UserId: {users.UserId}, Error: {str(db_error)}", exc_info=True)
+                            # Revert quota increment since commit failed
+                            quota.UsedQuota -= 1
+                            return redirect(url_for('jscore.index', page_title='Dashboard'))
                         # Store the mobile number, score, and API data in the session
                         session['mobile_number'] = mobile_number
                         session['api_score'] = api_data.get('JSCORE')
@@ -160,57 +382,367 @@ def index():
                         sim_age = api_data.get('sim_age', 'NA')
                         sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
 
-                        # Render the template with the obtained data
-                        return render_template(
-                            'index1.html', 
-                            api_data=api_data, 
-                            mobile_number=mobile_number, 
-                            sim_age=sim_age, 
-                            sim_info=sim_info, 
-                            page_title='JScore'
-                            )
+                        # Get user quota information for POST response
+                        subscription_type_name = None
+                        subscription_description = None
+                        max_quota = None
+                        used_quota = None
+                        remaining_quota = None
+                        quota_percentage = 0
+                        
+                        # Initialize analytics
+                        quota_history = []
+                        api_stats = {
+                            'total_calls': 0,
+                            'monthly_calls': 0,
+                            'success_rate': 0.0,
+                            'successful_calls': 0,
+                            'failed_calls': 0,
+                            'avg_score': 0.0,
+                            'recent_calls': [],
+                            'daily_usage': []
+                        }
+                        account_activity = {
+                            'last_agreement_date': None,
+                            'total_agreements': 0
+                        }
+                        
+                        if quota:
+                            max_quota = quota.MaxQuota
+                            used_quota = quota.UsedQuota
+                            remaining_quota = quota.MaxQuota - quota.UsedQuota
+                            quota_percentage = round((quota.UsedQuota / quota.MaxQuota * 100), 1) if quota.MaxQuota > 0 else 0
+                        
+                        if subscription_type:
+                            subscription_type_name = subscription_type.subscriptiontype
+                            subscription_description = subscription_type.description
+                        
+                        # Fetch analytics data (same as GET method)
+                        if users.UserId and jscore_product:
+                            # Get quota history (last 6 months)
+                            quota_history_records = Quota.query.filter(
+                                Quota.UserId == users.UserId,
+                                Quota.ProductId == jscore_product.id
+                            ).order_by(Quota.Year.desc(), Quota.Month.desc()).limit(6).all()
+                            
+                            for q in quota_history_records:
+                                quota_history.append({
+                                    'month': q.Month,
+                                    'year': q.Year,
+                                    'max': q.MaxQuota,
+                                    'used': q.UsedQuota,
+                                    'percentage': round((q.UsedQuota / q.MaxQuota * 100), 1) if q.MaxQuota > 0 else 0
+                                })
+                            
+                            # Get API usage statistics
+                            all_api_hits = APIHit.query.filter_by(
+                                user_id=users.UserId,
+                                product_id=jscore_product.id
+                            ).order_by(APIHit.timestamp.desc()).all()
+                            
+                            if all_api_hits:
+                                # Total calls
+                                api_stats['total_calls'] = len(all_api_hits)
+                                
+                                # Monthly calls
+                                monthly_hits = [h for h in all_api_hits if h.month == current_month and h.timestamp.year == current_year]
+                                api_stats['monthly_calls'] = len(monthly_hits)
+                                
+                                # Success/failure counts
+                                successful_hits = [h for h in all_api_hits if h.status == True]
+                                failed_hits = [h for h in all_api_hits if h.status == False]
+                                api_stats['successful_calls'] = len(successful_hits)
+                                api_stats['failed_calls'] = len(failed_hits)
+                                
+                                # Success rate
+                                if api_stats['total_calls'] > 0:
+                                    api_stats['success_rate'] = round((api_stats['successful_calls'] / api_stats['total_calls']) * 100, 1)
+                                
+                                # Average score (from successful calls with scores)
+                                scores = [h.score for h in successful_hits if h.score is not None]
+                                if scores:
+                                    api_stats['avg_score'] = round(sum(scores) / len(scores), 1)
+                                
+                                # Recent calls (last 10)
+                                recent_hits = all_api_hits[:10]
+                                for hit in recent_hits:
+                                    # Mask mobile number (show only last 4 digits)
+                                    mobile = str(hit.mobile_number)
+                                    if len(mobile) > 4:
+                                        masked_mobile = '****' + mobile[-4:]
+                                    else:
+                                        masked_mobile = mobile
+                                    
+                                    api_stats['recent_calls'].append({
+                                        'timestamp': hit.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                        'mobile': masked_mobile,
+                                        'status': hit.status,
+                                        'score': hit.score
+                                    })
+                                
+                                # Daily usage (last 7 days)
+                                seven_days_ago = datetime.now() - timedelta(days=7)
+                                daily_hits = {}
+                                for hit in all_api_hits:
+                                    if hit.timestamp >= seven_days_ago:
+                                        date_key = hit.timestamp.strftime('%Y-%m-%d')
+                                        daily_hits[date_key] = daily_hits.get(date_key, 0) + 1
+                                
+                                # Sort by date
+                                for date_key in sorted(daily_hits.keys(), reverse=True)[:7]:
+                                    api_stats['daily_usage'].append({
+                                        'date': date_key,
+                                        'calls': daily_hits[date_key]
+                                    })
+                            
+                            # Get account activity
+                            agreements = Agreement.query.filter_by(UserId=users.UserId).order_by(Agreement.agreement_time.desc()).all()
+                            if agreements:
+                                account_activity['total_agreements'] = len(agreements)
+                                account_activity['last_agreement_date'] = agreements[0].agreement_time.strftime('%Y-%m-%d %H:%M:%S')
+
+                        # Store additional data in session for GET request rendering
+                        session['sim_age'] = sim_age
+                        session['sim_info'] = sim_info
+                        session['show_results'] = True  # Flag to indicate we should show results
+                        
+                        # Redirect to GET request to prevent "Resubmit form" dialog on refresh
+                        # This implements the Post/Redirect/Get (PRG) pattern
+                        return redirect(url_for('jscore.index', page_title='Dashboard'))
                     else:
-                        # Handle API call failure
-                       
-                        flash('An Error occurred while calling the API')
-                        return redirect(url_for('jscore.index', page_title='JScore'))
+                        # Handle API call failure with user-friendly message
+                        # Note: Quota was NOT incremented, so no need to revert
+                        user_friendly_msg = ErrorHandler.get_api_error_message(api_data, status_code)
+                        flash(user_friendly_msg, 'danger')
+                        logger.error(f"API call failed for UserId: {users.UserId}, Status: {status_code}, Error: {api_data}")
+                        return redirect(url_for('jscore.index', page_title='Dashboard'))
                 else:
                     # Handle unauthorized access
-                    flash('No access.')
-                    return redirect(url_for('jscore.index', page_title='JScore'))
+                    flash('You do not have permission to access Tekscore features. Please contact your administrator.', 'danger')
+                    logger.warning(f"Unauthorized access attempt - UserId: {users.UserId}, RoleId: {users.RoleId}")
+                    return redirect(url_for('jscore.index', page_title='Tekscore'))
             elif subscription_type.subscriptiontype.lower() == 'postpaid':
+                 # Check if the user is authorized (RoleId == 1 for Jscore users)
                  if users and users.RoleId == 1:
+                        # Check if user has valid token before API call
+                        if not users.Token or not users.Token.strip():
+                            token_error_msg = ErrorHandler.get_token_error_message('missing')
+                            flash(token_error_msg, 'danger')
+                            logger.error(f"User {users.UserId} ({users.Username}) has no token before API call")
+                            return redirect(url_for('jscore.index', page_title='Dashboard'))
+                        
                         api_data, status_code = call_Jscore_api_function(users, mobile_number)
                         if status_code == 200:
-                            quota.UsedQuota += 1
-                            db.session.commit()
+                            # Update quota if it exists (for tracking purposes, postpaid users may not have quota)
+                            score = api_data.get('JSCORE') or api_data.get('score')
+                            
+                            # Create APIHit record for postpaid users too
+                            if score is not None and score != 0:
+                                api_hit = APIHit(
+                                    user_id=users.UserId,
+                                    product_id=jscore_product.id,
+                                    mobile_number=mobile_number,
+                                    status=True,
+                                    score=score
+                                )
+                            else:
+                                api_hit = APIHit(
+                                    user_id=users.UserId,
+                                    product_id=jscore_product.id,
+                                    mobile_number=mobile_number,
+                                    status=False,
+                                    score=score
+                                )
+                            
+                            # Update quota and commit with error handling
+                            try:
+                                if quota:
+                                    quota.UsedQuota += 1
+                                db.session.add(api_hit)
+                                db.session.commit()
+                            except Exception as db_error:
+                                # Rollback on database error
+                                db.session.rollback()
+                                error_msg = ErrorHandler.format_database_error(db_error)
+                                flash(error_msg, 'danger')
+                                logger.error(f"Database error while saving API hit for postpaid UserId: {users.UserId}, Error: {str(db_error)}", exc_info=True)
+                                # Revert quota increment if it was incremented
+                                if quota:
+                                    quota.UsedQuota -= 1
+                                return redirect(url_for('jscore.index', page_title='Dashboard'))
+                            
                             session['mobile_number'] = mobile_number
-                            session['api_score'] = api_data.get('score')
+                            session['api_score'] = api_data.get('JSCORE') or api_data.get('score')
                             session['api_data'] = api_data
 
                             sim_age = api_data.get('sim_age', 'NA')
                             sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
 
-                            return render_template(
-                                'index1.html', 
-                                api_data=api_data, 
-                                mobile_number=mobile_number, 
-                                sim_age=sim_age, 
-                                sim_info=sim_info, 
-                                page_title='JScore'
-                            )
+                            # Get user quota information for POST response
+                            subscription_type_name = None
+                            subscription_description = None
+                            max_quota = None
+                            used_quota = None
+                            remaining_quota = None
+                            quota_percentage = 0
+                            
+                            # Initialize analytics
+                            quota_history = []
+                            api_stats = {
+                                'total_calls': 0,
+                                'monthly_calls': 0,
+                                'success_rate': 0.0,
+                                'successful_calls': 0,
+                                'failed_calls': 0,
+                                'avg_score': 0.0,
+                                'recent_calls': [],
+                                'daily_usage': []
+                            }
+                            account_activity = {
+                                'last_agreement_date': None,
+                                'total_agreements': 0
+                            }
+                            
+                            if quota:
+                                max_quota = quota.MaxQuota
+                                used_quota = quota.UsedQuota
+                                remaining_quota = quota.MaxQuota - quota.UsedQuota
+                                quota_percentage = round((quota.UsedQuota / quota.MaxQuota * 100), 1) if quota.MaxQuota > 0 else 0
+                            
+                            if subscription_type:
+                                subscription_type_name = subscription_type.subscriptiontype
+                                subscription_description = subscription_type.description
+                            
+                            # Fetch analytics data (same as GET method)
+                            if users.UserId and jscore_product:
+                                # Get quota history (last 6 months)
+                                quota_history_records = Quota.query.filter(
+                                    Quota.UserId == users.UserId,
+                                    Quota.ProductId == jscore_product.id
+                                ).order_by(Quota.Year.desc(), Quota.Month.desc()).limit(6).all()
+                                
+                                for q in quota_history_records:
+                                    quota_history.append({
+                                        'month': q.Month,
+                                        'year': q.Year,
+                                        'max': q.MaxQuota,
+                                        'used': q.UsedQuota,
+                                        'percentage': round((q.UsedQuota / q.MaxQuota * 100), 1) if q.MaxQuota > 0 else 0
+                                    })
+                                
+                                # Get API usage statistics
+                                all_api_hits = APIHit.query.filter_by(
+                                    user_id=users.UserId,
+                                    product_id=jscore_product.id
+                                ).order_by(APIHit.timestamp.desc()).all()
+                                
+                                if all_api_hits:
+                                    # Total calls
+                                    api_stats['total_calls'] = len(all_api_hits)
+                                    
+                                    # Monthly calls
+                                    monthly_hits = [h for h in all_api_hits if h.month == current_month and h.timestamp.year == current_year]
+                                    api_stats['monthly_calls'] = len(monthly_hits)
+                                    
+                                    # Success/failure counts
+                                    successful_hits = [h for h in all_api_hits if h.status == True]
+                                    failed_hits = [h for h in all_api_hits if h.status == False]
+                                    api_stats['successful_calls'] = len(successful_hits)
+                                    api_stats['failed_calls'] = len(failed_hits)
+                                    
+                                    # Success rate
+                                    if api_stats['total_calls'] > 0:
+                                        api_stats['success_rate'] = round((api_stats['successful_calls'] / api_stats['total_calls']) * 100, 1)
+                                    
+                                    # Average score (from successful calls with scores)
+                                    scores = [h.score for h in successful_hits if h.score is not None]
+                                    if scores:
+                                        api_stats['avg_score'] = round(sum(scores) / len(scores), 1)
+                                    
+                                    # Recent calls (last 10)
+                                    recent_hits = all_api_hits[:10]
+                                    for hit in recent_hits:
+                                        # Mask mobile number (show only last 4 digits)
+                                        mobile = str(hit.mobile_number)
+                                        if len(mobile) > 4:
+                                            masked_mobile = '****' + mobile[-4:]
+                                        else:
+                                            masked_mobile = mobile
+                                        
+                                        api_stats['recent_calls'].append({
+                                            'timestamp': hit.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                                            'mobile': masked_mobile,
+                                            'status': hit.status,
+                                            'score': hit.score
+                                        })
+                                    
+                                    # Daily usage (last 7 days)
+                                    seven_days_ago = datetime.now() - timedelta(days=7)
+                                    daily_hits = {}
+                                    for hit in all_api_hits:
+                                        if hit.timestamp >= seven_days_ago:
+                                            date_key = hit.timestamp.strftime('%Y-%m-%d')
+                                            daily_hits[date_key] = daily_hits.get(date_key, 0) + 1
+                                    
+                                    # Sort by date
+                                    for date_key in sorted(daily_hits.keys(), reverse=True)[:7]:
+                                        api_stats['daily_usage'].append({
+                                            'date': date_key,
+                                            'calls': daily_hits[date_key]
+                                        })
+                                
+                                # Get account activity
+                                agreements = Agreement.query.filter_by(UserId=users.UserId).order_by(Agreement.agreement_time.desc()).all()
+                                if agreements:
+                                    account_activity['total_agreements'] = len(agreements)
+                                    account_activity['last_agreement_date'] = agreements[0].agreement_time.strftime('%Y-%m-%d %H:%M:%S')
+
+                            # Store additional data in session for GET request rendering
+                            session['sim_age'] = sim_age
+                            session['sim_info'] = sim_info
+                            session['show_results'] = True  # Flag to indicate we should show results
+                            
+                            # Redirect to GET request to prevent "Resubmit form" dialog on refresh
+                            # This implements the Post/Redirect/Get (PRG) pattern
+                            return redirect(url_for('jscore.index', page_title='Dashboard'))
                         else:
-                            flash('An error occurred while calling the API')
-                            return redirect(url_for('jscore.index', page_title='JScore'))
+                            # Handle API call failure with user-friendly message
+                            # Note: Quota was NOT incremented, so no need to revert
+                            user_friendly_msg = ErrorHandler.get_api_error_message(api_data, status_code)
+                            flash(user_friendly_msg, 'danger')
+                            logger.error(f"API call failed for postpaid UserId: {users.UserId}, Status: {status_code}, Error: {api_data}")
+                            return redirect(url_for('jscore.index', page_title='Dashboard'))
+                 else:
+                     flash('You do not have permission to access Tekscore features. Please contact your administrator.', 'danger')
+                     logger.warning(f"Unauthorized access attempt - UserId: {users.UserId}, RoleId: {users.RoleId}")
+                     return redirect(url_for('jscore.index', page_title='Dashboard'))
+            else:
+                # Unknown subscription type
+                flash(f'Your subscription type ({subscription_type.subscriptiontype}) is not supported. Please contact support.', 'danger')
+                logger.error(f"Unsupported subscription type: {subscription_type.subscriptiontype} for UserId: {users.UserId}")
+                return redirect(url_for('jscore.index', page_title='JScore'))
         
         # Clear the mobile number in the session if no form is submitted
         session['mobile_number'] = ""
         return render_template('index1.html', page_title='JScore')
 
+    except AttributeError as attr_err:
+        # Handle attribute errors (e.g., accessing None object attributes)
+        logger.error(f"AttributeError in index: {str(attr_err)}", exc_info=True)
+        flash('A data error occurred. Please refresh the page and try again. If the problem persists, contact support.', 'danger')
+        return redirect(url_for('jscore.index', page_title='JScore'))
     except Exception as e:
-        # Handle any unexpected exceptions and render the error page
-        print(e)
-        return render_template('error.html'), 500
+        # Handle any unexpected exceptions
+        logger.error(f"Unexpected error in index: {str(e)}", exc_info=True)
+        # Check if it's a database error
+        if 'database' in str(e).lower() or 'sql' in str(e).lower() or 'connection' in str(e).lower():
+            user_message = ErrorHandler.format_database_error(e)
+        elif 'network' in str(e).lower() or 'timeout' in str(e).lower():
+            user_message = ErrorHandler.format_network_error(e)
+        else:
+            user_message = "An unexpected error occurred. Please try again later. If the problem persists, contact support."
+        flash(user_message, 'danger')
+        return redirect(url_for('jscore.index', page_title='JScore'))
 
 
 # -------------------------------------------------------------------------------------------------------
@@ -240,7 +772,12 @@ def credithistory():
     sim_info = 'PRIMARY NUMBER' if api_data.get('sacendory') == 1 else 'SECONDARY NUMBER'
 
     users = User.query.filter_by(UserId=session['userId']).first()
+    
+    if not users:
+        flash('User not found. Please log in again.', 'danger')
+        return redirect(url_for('user.show_login'))
 
+    # Check if user has Jscore role (RoleId == 1)
     if users and users.RoleId == 1:
                 # Call the external API to retrieve the score and related data
                 history_api_data, status_code = call_JscoreHistory_api_function(users, mobile_number)
@@ -281,7 +818,7 @@ def credithistory():
                 
                     # Render the credit history template with the retrieved data
                     return render_template('credithistory.html', 
-                                        page_title='JScore History',  
+                                        page_title='Tekscore History',  
                                         sim_age = sim_age,
                                         sim_info=sim_info,
                                         chartData=history_api_data,
@@ -295,13 +832,16 @@ def credithistory():
                                         mobile_number = mobile_number
                                         )
                 else:     
-                    flash('Error. Please try again')
-                    return redirect(url_for('jscore.index', page_title='JScore'))
+                    error_msg = history_api_data.get('message', history_api_data.get('error', 'An error occurred while calling the API'))
+                    flash(f'API Error: {error_msg}', 'danger')
+                    logger.error(f"History API call failed for UserId: {users.UserId}, Status: {status_code}")
+                    return redirect(url_for('jscore.index', page_title='Tekscore'))
 
     else:
-                # Handle unauthorized access
-                flash('No access.')
-                return redirect(url_for('jscore.index', page_title='JScore'))
+        # Handle unauthorized access
+        flash('You do not have permission to view credit history. Please contact your administrator.', 'danger')
+        logger.warning(f"Unauthorized access to credithistory - UserId: {users.UserId}, RoleId: {users.RoleId}")
+        return redirect(url_for('jscore.index', page_title='Tekscore'))
 
 
 
@@ -407,7 +947,28 @@ def confirm_change_plan():
 def myaccount():
     if 'userId'not in session or 'agreementuserid' not in session:
         return redirect(url_for('user.show_login'))
-    return render_template('myaccount.html')
+    return render_template('myaccount.html', page_title='My Account')
+
+
+@jscore_bp.route('/help_page')
+def show_help_page():
+    if 'userId'not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('help.html', page_title='Help')
+
+
+@jscore_bp.route('/settings')
+def settings():
+    if 'userId'not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('settings.html', page_title='Settings')
+
+
+@jscore_bp.route('/activity_log')
+def activity_log():
+    if 'userId'not in session or 'agreementuserid' not in session:
+        return redirect(url_for('user.show_login'))
+    return render_template('activity_log.html', page_title='Activity Log')
 
 
 

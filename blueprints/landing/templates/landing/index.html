@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekscore - SMS Marketing Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/logo-icon.png') }}" type="image/png">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo logo-container">
+                <a href="#home" class="tekscore-logo">
+                    <span class="inline-tekscore-logo">
+                        <span class="logo-t-box">T</span>
+                        <span class="logo-ek">EK</span>
+                        <span class="logo-score">SCORE</span>
+                    </span>
+                </a>
+            </div>
+            <div class="navbar-links">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+            </div>
+            <div class="navbar-actions">
+                <a href="{{ url_for('user.show_login') }}" class="btn-ghost">Login</a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span class="material-icons">menu</span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#home" class="mobile-nav-link">Home</a>
+            <a href="#features" class="mobile-nav-link">Features</a>
+            <a href="#how-it-works" class="mobile-nav-link">How It Works</a>
+            <a href="{{ url_for('user.show_login') }}" class="mobile-nav-link">Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-heading">Get Instant Credit Scores in Seconds</h1>
+                <p class="hero-subtitle">Make Informed Financial Decisions with Real-Time Credit Assessment</p>
+                <p class="hero-description">Access comprehensive credit scoring and 6-month credit history analysis powered by advanced mobile number-based assessment. Get instant insights to evaluate creditworthiness and make smarter lending decisions.</p>
+                <a href="{{ url_for('user.signup') }}" class="btn-primary">Get Started</a>
+            </div>
+            <div class="hero-visual">
+                <!-- SVG Wave Divider - Creates wavy edge between white and colored sections -->
+                <div class="wave-divider">
+                    <svg viewBox="0 0 120 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:rgba(12, 99, 141, 0.12);stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:rgba(12, 99, 141, 0.22);stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Wavy path creating smooth curve from left edge -->
+                        <path d="M 0,0 
+                                 Q 25,100 35,200 
+                                 T 50,400 
+                                 T 65,600 
+                                 T 80,800 
+                                 L 120,800 
+                                 L 120,0 
+                                 Z" 
+                              fill="url(#waveGradient)" />
+                    </svg>
+                </div>
+                <div class="gradient-bubbles">
+                    <div class="bubble bubble-large"></div>
+                    <div class="bubble bubble-medium"></div>
+                    <div class="bubble bubble-small"></div>
+                </div>
+                <div class="hero-illustration">
+                    <img src="{{ url_for('static', filename='Assets/illustration.png') }}" alt="Credit Scoring Illustration" class="illustration-image" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-container">
+            <h2 class="section-heading">How It Works</h2>
+            <p class="section-intro">Get instant credit scores in just a few simple steps</p>
+            <div class="how-it-works-timeline">
+                <div class="timeline-steps">
+                    <div class="timeline-step" data-step="1">
+                        <div class="step-card" data-step-number="01">
+                            <div class="step-card-top">
+                                <div class="step-icon">
+                                    <span class="material-icons">phone_android</span>
+                                </div>
+                                <h3 class="step-title">Enter Mobile Number</h3>
+                                <p class="step-description">Quick input</p>
+                            </div>
+                            <div class="step-card-bottom">
+                                <span class="step-label">STEP 01</span>
+                            </div>
+                        </div>
+                        <div class="step-arrow">
+                            <svg width="40" height="60" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 30 Q 20 20, 40 30" stroke="url(#arrowGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <path d="M 35 28 L 40 30 L 35 32" stroke="url(#arrowGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#0c638d;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#39b54a;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="timeline-step" data-step="2">
+                        <div class="step-card" data-step-number="02">
+                            <div class="step-card-top">
+                                <div class="step-icon">
+                                    <span class="material-icons">speed</span>
+                                </div>
+                                <h3 class="step-title">Instant Analysis</h3>
+                                <p class="step-description">Real-time processing</p>
+                            </div>
+                            <div class="step-card-bottom">
+                                <span class="step-label">STEP 02</span>
+                            </div>
+                        </div>
+                        <div class="step-arrow">
+                            <svg width="40" height="60" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 30 Q 20 20, 40 30" stroke="url(#arrowGradient2)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <path d="M 35 28 L 40 30 L 35 32" stroke="url(#arrowGradient2)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="arrowGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#0c638d;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#39b54a;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="timeline-step" data-step="3">
+                        <div class="step-card" data-step-number="03">
+                            <div class="step-card-top">
+                                <div class="step-icon">
+                                    <span class="material-icons">assessment</span>
+                                </div>
+                                <h3 class="step-title">Get Credit Score</h3>
+                                <p class="step-description">Immediate results</p>
+                            </div>
+                            <div class="step-card-bottom">
+                                <span class="step-label">STEP 03</span>
+                            </div>
+                        </div>
+                        <div class="step-arrow">
+                            <svg width="40" height="60" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 30 Q 20 20, 40 30" stroke="url(#arrowGradient3)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <path d="M 35 28 L 40 30 L 35 32" stroke="url(#arrowGradient3)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="arrowGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#0c638d;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#39b54a;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="timeline-step" data-step="4">
+                        <div class="step-card" data-step-number="04">
+                            <div class="step-card-top">
+                                <div class="step-icon">
+                                    <span class="material-icons">history</span>
+                                </div>
+                                <h3 class="step-title">View History</h3>
+                                <p class="step-description">6-month trends</p>
+                            </div>
+                            <div class="step-card-bottom">
+                                <span class="step-label">STEP 04</span>
+                            </div>
+                        </div>
+                        <div class="step-arrow">
+                            <svg width="40" height="60" viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 0 30 Q 20 20, 40 30" stroke="url(#arrowGradient4)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <path d="M 35 28 L 40 30 L 35 32" stroke="url(#arrowGradient4)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="arrowGradient4" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#0c638d;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#39b54a;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="timeline-step" data-step="5">
+                        <div class="step-card" data-step-number="05">
+                            <div class="step-card-top">
+                                <div class="step-icon">
+                                    <span class="material-icons">insights</span>
+                                </div>
+                                <h3 class="step-title">Make Decisions</h3>
+                                <p class="step-description">Data-driven insights</p>
+                            </div>
+                            <div class="step-card-bottom">
+                                <span class="step-label">STEP 05</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Features Section - Vertical Advantages -->
+        <section class="features" id="features">
+            <div style="max-width: 1700px; margin: 0 auto; padding: 0 clamp(20px, 3vw, 40px);">
+                <!-- Heading on Top with Space Above -->
+                <div class="features-header">
+                    <h2 class="section-heading">Features</h2>
+                    <p class="section-intro">Discover powerful tools to make smarter credit decisions</p>
+                </div>
+                
+                <!-- Three Column Layout: Advantages Left, Illustration Center, Advantages Right -->
+                <div class="features-layout">
+                    <!-- Advantages List on Left -->
+                    <div class="features-advantages-wrapper features-advantages-left">
+                        <!-- Advantage 1 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">speed</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Instant Credit Scoring</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Get real-time credit scores instantly by entering a mobile number. Fast, accurate assessment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advantage 2 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">history</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Credit History</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Access 6-month credit history trends with detailed analytics. Make data-driven decisions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advantage 3 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">phone_android</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Mobile Intelligence</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Advanced mobile analysis with SIM age detection for deeper customer insights.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loan Illustration in Center -->
+                    <div class="features-illustration">
+                        <img src="{{ url_for('static', filename='Assets/loan-illustration.jpg') }}" alt="Loan Illustration" />
+                    </div>
+                    
+                    <!-- Advantages List on Right -->
+                    <div class="features-advantages-wrapper features-advantages-right">
+                        <!-- Advantage 4 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">insights</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Analytics</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Visualize credit trends with interactive charts. Track scores in real-time.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advantage 5 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">security</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Secure & Compliant</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Enterprise-grade security with role-based access control. Your data is protected.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advantage 6 -->
+                        <div class="advantage-item">
+                            <div class="advantage-card">
+                                <div class="advantage-card-inner">
+                                    <div class="advantage-card-front">
+                                        <div class="advantage-card-icon">
+                                            <span class="material-icons">account_balance_wallet</span>
+                                        </div>
+                                        <h3 class="advantage-card-title">Flexible Plans</h3>
+                                    </div>
+                                    <div class="advantage-card-back">
+                                        <p class="advantage-card-description">Choose from Basic, Professional, or Enterprise plans to suit your needs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-accent-line"></div>
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <a href="#home" class="footer-logo">
+                        <span class="inline-tekscore-logo">
+                            <span class="logo-t-box">T</span>
+                            <span class="logo-ek">EK</span>
+                            <span class="logo-score">SCORE</span>
+                        </span>
+                    </a>
+                    <p class="footer-tagline">Instant credit scoring powered by advanced mobile intelligence</p>
+                </div>
+                <div class="footer-columns">
+                    <div class="footer-column">
+                        <h4 class="footer-heading">Product</h4>
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#how-it-works" class="footer-link">How It Works</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-heading">Company</h4>
+                        <a href="https://teknosys.ai/#about" target="_blank" class="footer-link">About</a>
+                        <a href="https://teknosys.ai/#contact" target="_blank" class="footer-link">Contact</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-heading">Contact</h4>
+                        <a href="mailto:contact@tekscore.com" class="footer-link">contact@tekscore.com</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 Teknosys. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+</html>

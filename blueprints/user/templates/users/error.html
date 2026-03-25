@@ -14,7 +14,8 @@
     <!-- Custom fonts for this template-->
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link rel="icon" href="{{ url_for('static', filename='Assets/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='Assets/logo-icon.png') }}" type="image/png">
 
     <!-- Custom styles for this template-->
     <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
@@ -29,13 +30,17 @@
             <div id="content" class="d-flex justify-content-center align-items-center flex-grow-1">
                 <div class="container-fluid text-center">
                     
-                    <!-- 404 Error Text -->
+                    <!-- Error Text -->
                     <div>
                         <h1>Oops! Something went wrong.</h1>
-                        <div class="error mx-auto" data-text="404">404</div>
-                        <p class="lead text-gray-800 mb-5">Error</p>
-                        <p class="text-gray-500 mb-0">It looks like you found a glitch in the matrix...</p>
-                        <a href="{{ url_for('user.show_login') }}">&larr; Back to login</a>
+                        <div class="error mx-auto" data-text="500">500</div>
+                        <p class="lead text-gray-800 mb-5">Internal Server Error</p>
+                        <p class="text-gray-500 mb-4">We're sorry, but something went wrong on our end. Our team has been notified and is working to fix the issue.</p>
+                        <p class="text-gray-500 mb-4">Please try again in a few moments. If the problem persists, please contact support.</p>
+                        <div class="mt-4">
+                            <a href="{{ url_for('landing.index') }}" class="btn btn-primary mr-2">Go to Home</a>
+                            <a href="{{ url_for('user.show_login') }}" class="btn btn-secondary">Back to Login</a>
+                        </div>
                     </div>
 
                 </div>
@@ -45,7 +50,7 @@
             <footer class="sticky-footer bg-white mt-auto">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; JSCORES <span id="year"></span></span>
+                        <span>Copyright &copy; Tekscore <span id="year"></span></span>
                     </div>
                 </div>
             </footer>
